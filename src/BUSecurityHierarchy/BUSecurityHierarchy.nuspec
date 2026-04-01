@@ -21,12 +21,12 @@
     <tags>XrmToolBox Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform</tags>
     <repository type="git" url="https://github.com/Jay0111/BUSecurityHierarchy.git" />
     <dependencies>
-      <group targetFramework="net462">
+      <group targetFramework="net48">
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net462" />
+    <file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net48" />
     <file src="Resources\icon.png" target="images\icon.png" />
     <file src="..\..\README.md" target="docs\README.md" />
   </files>

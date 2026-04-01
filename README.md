@@ -105,24 +105,20 @@ Dynamics 365 → Settings → Security → Security Roles → [Your Role]
 ### Prerequisites
 
 - Visual Studio 2019 or later
-- .NET Framework 4.6.2
+- .NET Framework 4.8
 - XrmToolBox SDK (NuGet)
-
-### Steps
 
 ```bash
 git clone https://github.com/Jay0111/BUSecurityHierarchy.git
 ```
 
-```bash
-cd BUSecurityHierarchy/src/BUSecurityHierarchy
-```
-
-```bash
-dotnet build -c Release
-```
+1. Open `BUSecurityHierarchy.sln` in **Visual Studio 2022**
+2. Set configuration to **Release**
+3. Build → **Rebuild Solution**
 
 Output DLL will be in `bin/Release/BUSecurityHierarchy.dll`
+
+> ⚠️ **Note:** This is a .NET Framework 4.8 project. Use **Visual Studio** to build — `dotnet build` is not supported for .NET Framework projects.
 
 ### Test Locally in XrmToolBox
 
@@ -148,15 +144,13 @@ BUSecurityHierarchy/
     └── BUSecurityHierarchy/
         ├── BUSecurityHierarchy.csproj        # Project file
         ├── BUSecurityHierarchy.nuspec        # NuGet package spec
-        ├── BUSecurityHierarchyPlugin.cs      # Plugin registration
+        ├── MyPlugin.cs                       # Plugin registration
         ├── MyPluginControl.cs                # Main logic
         ├── MyPluginControl.designer.cs       # UI layout
         │
         └── Resources/
             └── icon.png                      # Plugin icon (32x32)
 ```
-
----
 
 ## 🗺️ Roadmap
 
