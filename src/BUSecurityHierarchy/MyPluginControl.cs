@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using McTools.Xrm.Connection;
+﻿using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 
 namespace BUSecurityHierarchy
 {
     public partial class MyPluginControl : PluginControlBase
     {
-        private EntityCollection allBUs;
-        private EntityCollection allTeams;
-        private EntityCollection allUsers;
-
         public MyPluginControl()
         {
             InitializeComponent();
@@ -24,19 +18,36 @@ namespace BUSecurityHierarchy
 
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
-            LogInfo("Plugin loaded.");
         }
 
-        public override void UpdateConnection(IOrganizationService newService, ConnectionDetail detail,
-            string actionName, object parameter)
+        #region Connection Handling
+
+        /// <summary>
+        /// This event fires when user connects/reconnects to a Dataverse org.
+        /// Provided FREE by PluginControlBase.
+        /// </summary>
+        public override void UpdateConnection(IOrganizationService newService,
+            ConnectionDetail detail, string actionName, object parameter)
         {
+            // Call base to update the internal Service property
             base.UpdateConnection(newService, detail, actionName, parameter);
-            LogInfo("Connected to: " + detail.WebApplicationUrl);
+
+            // Optional: Show which org user connected to
+            LogInfo($"Connected to: {detail.WebApplicationUrl}");
+
+            // Optional: Auto-load hierarchy on new connection
+            // ExecuteMethod(LoadBUHierarchy);
         }
 
-        // ========== LOAD DATA ==========
+        #endregion
+
+        #region Load BU Hierarchy
+
         private void btnLoadHierarchy_Click(object sender, EventArgs e)
         {
+            // ExecuteMethod checks: "Are you connected?"
+            // If NOT connected → shows "Please connect to an organization first"
+            // If connected → runs LoadBUHierarchy()
             ExecuteMethod(LoadBUHierarchy);
         }
 
@@ -44,298 +55,325 @@ namespace BUSecurityHierarchy
         {
             WorkAsync(new WorkAsyncInfo
             {
-                Message = "Loading Business Unit Hierarchy...",
+                Message = "Loading Business Unit hierarchy...",
                 Work = (worker, args) =>
                 {
-                    // Fetch ONLY Active Business Units (isdisabled = false)
-                    QueryExpression buQuery = new QueryExpression("businessunit");
-                    buQuery.ColumnSet = new ColumnSet("name", "parentbusinessunitid", "businessunitid");
-                    buQuery.Criteria.AddCondition("isdisabled", ConditionOperator.Equal, false);
-                    buQuery.AddOrder("name", OrderType.Ascending);
-                    EntityCollection buResults = Service.RetrieveMultiple(buQuery);
-
-                    // Fetch Teams belonging to Active BUs only
-                    QueryExpression teamQuery = new QueryExpression("team");
-                    teamQuery.ColumnSet = new ColumnSet("name", "businessunitid", "teamid", "teamtype");
-                    teamQuery.AddOrder("name", OrderType.Ascending);
-
-                    // Link to active BUs only
-                    LinkEntity teamBuLink = teamQuery.AddLink("businessunit", "businessunitid", "businessunitid");
-                    teamBuLink.LinkCriteria.AddCondition("isdisabled", ConditionOperator.Equal, false);
-
-                    EntityCollection teamResults = Service.RetrieveMultiple(teamQuery);
-
-                    // Fetch ONLY Active Users (isdisabled = false)
-                    QueryExpression userQuery = new QueryExpression("systemuser");
-                    userQuery.ColumnSet = new ColumnSet("fullname", "businessunitid", "systemuserid", "internalemailaddress");
-                    userQuery.Criteria.AddCondition("isdisabled", ConditionOperator.Equal, false);
-                    userQuery.Criteria.AddCondition("accessmode", ConditionOperator.NotEqual, 3); // Exclude non-interactive users
-                    userQuery.AddOrder("fullname", OrderType.Ascending);
-                    EntityCollection userResults = Service.RetrieveMultiple(userQuery);
-
-                    args.Result = new object[] { buResults, teamResults, userResults };
+                    try
+                    {
+                        var query = new QueryExpression("businessunit")
+                        {
+                            ColumnSet = new ColumnSet("businessunitid", "name", "parentbusinessunitid"),
+                            Orders = { new OrderExpression("name", OrderType.Ascending) }
+                        };
+                        args.Result = Service.RetrieveMultiple(query);
+                    }
+                    catch (Exception ex)
+                    {
+                        // This will be available as args.Error in PostWorkCallBack
+                        throw new Exception($"Failed to load Business Units. " +
+                            $"Ensure you have 'Read' privilege on Business Unit entity.\n\n" +
+                            $"Details: {ex.Message}", ex);
+                    }
                 },
                 PostWorkCallBack = (args) =>
                 {
                     if (args.Error != null)
                     {
-                        MessageBox.Show(args.Error.Message, "Error",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ShowErrorDialog(args.Error, "Security or Connection Error");
                         return;
                     }
 
-                    object[] results = (object[])args.Result;
-                    allBUs = (EntityCollection)results[0];
-                    allTeams = (EntityCollection)results[1];
-                    allUsers = (EntityCollection)results[2];
+                    var entities = ((EntityCollection)args.Result).Entities;
 
-                    PopulateBusinessUnits();
+                    if (entities.Count == 0)
+                    {
+                        MessageBox.Show(
+                            "No Business Units found. This could mean:\n\n" +
+                            "• Your security role doesn't have Read access to Business Units\n" +
+                            "• Your BU scope is restricted",
+                            "No Data",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        return;
+                    }
 
-                    lblBU.Text = "Business Units (" + allBUs.Entities.Count + ")";
-                    lblTeams.Text = "Teams";
-                    lblUsers.Text = "Users";
-
-                    LogInfo("Hierarchy loaded successfully.");
+                    BuildBUTree(entities);
                 }
             });
         }
 
-        // ========== POPULATE BUSINESS UNITS ==========
-        private void PopulateBusinessUnits()
+        private void BuildBUTree(DataCollection<Entity> businessUnits)
         {
-            listViewBU.Items.Clear();
-            listViewTeams.Items.Clear();
-            listViewUsers.Items.Clear();
+            treeViewBU.BeginUpdate();
+            treeViewBU.Nodes.Clear();
 
-            foreach (Entity bu in allBUs.Entities)
+            var rootBU = businessUnits.FirstOrDefault(bu =>
+                !bu.Contains("parentbusinessunitid"));
+
+            if (rootBU == null)
             {
-                string buName = bu.GetAttributeValue<string>("name");
-                Guid buId = bu.Id;
-
-                ListViewItem item = new ListViewItem(buName);
-                item.Tag = buId;
-                listViewBU.Items.Add(item);
-            }
-        }
-
-        // ========== BU SELECTED → SHOW TEAMS & USERS ==========
-        private void listViewBU_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            listViewTeams.Items.Clear();
-            listViewUsers.Items.Clear();
-
-            if (listViewBU.SelectedItems.Count == 0)
-                return;
-
-            Guid selectedBUId = (Guid)listViewBU.SelectedItems[0].Tag;
-            string selectedBUName = listViewBU.SelectedItems[0].Text;
-
-            // Filter Teams for selected BU
-            int teamCount = 0;
-            foreach (Entity team in allTeams.Entities)
-            {
-                EntityReference teamBuRef = team.GetAttributeValue<EntityReference>("businessunitid");
-                if (teamBuRef != null && teamBuRef.Id == selectedBUId)
+                // User might only see their own BU (not root)
+                // Fallback: treat the first BU as root
+                rootBU = businessUnits.FirstOrDefault();
+                if (rootBU == null)
                 {
-                    string teamName = team.GetAttributeValue<string>("name");
-                    OptionSetValue teamType = team.GetAttributeValue<OptionSetValue>("teamtype");
-                    string teamTypeName = GetTeamTypeName(teamType);
-
-                    ListViewItem item = new ListViewItem(teamName);
-                    item.SubItems.Add(teamTypeName);
-                    item.Tag = team.Id;
-                    listViewTeams.Items.Add(item);
-                    teamCount++;
+                    treeViewBU.EndUpdate();
+                    return;
                 }
             }
 
-            // Filter Users for selected BU
-            int userCount = 0;
-            foreach (Entity user in allUsers.Entities)
-            {
-                EntityReference userBuRef = user.GetAttributeValue<EntityReference>("businessunitid");
-                if (userBuRef != null && userBuRef.Id == selectedBUId)
-                {
-                    string userName = user.GetAttributeValue<string>("fullname");
-                    string email = user.GetAttributeValue<string>("internalemailaddress");
+            var rootNode = CreateBUNode(rootBU);
+            treeViewBU.Nodes.Add(rootNode);
+            AddChildNodes(rootNode, rootBU.Id, businessUnits);
+            rootNode.Expand();
+            treeViewBU.EndUpdate();
 
-                    ListViewItem item = new ListViewItem(userName);
-                    item.SubItems.Add(email ?? "");
-                    item.Tag = user.Id;
-                    listViewUsers.Items.Add(item);
-                    userCount++;
-                }
-            }
-
-            lblTeams.Text = "Teams (" + teamCount + ") - " + selectedBUName;
-            lblUsers.Text = "Users (" + userCount + ") - " + selectedBUName;
+            // Show count in label
+            lblBU.Text = $"📂 Business Units ({businessUnits.Count})";
         }
 
-        // ========== TEAM SELECTED → SHOW TEAM MEMBERS ==========
-        private void listViewTeams_SelectedIndexChanged(object sender, EventArgs e)
+        private void AddChildNodes(TreeNode parentNode, Guid parentBUId,
+            DataCollection<Entity> allBUs)
         {
+            var children = allBUs.Where(bu =>
+                bu.Contains("parentbusinessunitid") &&
+                ((EntityReference)bu["parentbusinessunitid"]).Id == parentBUId);
+
+            foreach (var childBU in children)
+            {
+                var childNode = CreateBUNode(childBU);
+                parentNode.Nodes.Add(childNode);
+                AddChildNodes(childNode, childBU.Id, allBUs);
+            }
+        }
+
+        private TreeNode CreateBUNode(Entity bu)
+        {
+            var name = bu.GetAttributeValue<string>("name") ?? "(No Name)";
+            var node = new TreeNode("📁 " + name)
+            {
+                Tag = bu.Id,
+                Name = bu.Id.ToString()
+            };
+            return node;
+        }
+
+        #endregion
+
+        #region Expand / Collapse
+
+        private void btnExpandAll_Click(object sender, EventArgs e)
+        {
+            treeViewBU.ExpandAll();
+        }
+
+        private void btnCollapseAll_Click(object sender, EventArgs e)
+        {
+            treeViewBU.CollapseAll();
+        }
+
+        #endregion
+
+        #region BU Selected → Load Teams
+
+        private void treeViewBU_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Node?.Tag == null) return;
+
+            var selectedBUId = (Guid)e.Node.Tag;
+            listViewTeams.Items.Clear();
             listViewUsers.Items.Clear();
 
-            if (listViewTeams.SelectedItems.Count == 0)
-                return;
+            LoadTeamsForBU(selectedBUId);
+        }
 
-            Guid selectedTeamId = (Guid)listViewTeams.SelectedItems[0].Tag;
-            string selectedTeamName = listViewTeams.SelectedItems[0].Text;
-
+        private void LoadTeamsForBU(Guid businessUnitId)
+        {
             WorkAsync(new WorkAsyncInfo
             {
-                Message = "Loading Team Members...",
+                Message = "Loading Teams...",
                 Work = (worker, args) =>
                 {
-                    // Fetch team members using N:N relationship
-                    QueryExpression memberQuery = new QueryExpression("systemuser");
-                    memberQuery.ColumnSet = new ColumnSet("fullname", "internalemailaddress", "systemuserid");
-                    memberQuery.Criteria.AddCondition("isdisabled", ConditionOperator.Equal, false);
-                    memberQuery.AddOrder("fullname", OrderType.Ascending);
-
-                    LinkEntity linkEntity = memberQuery.AddLink("teammembership", "systemuserid", "systemuserid");
-                    linkEntity.LinkCriteria.AddCondition("teamid", ConditionOperator.Equal, selectedTeamId);
-
-                    args.Result = Service.RetrieveMultiple(memberQuery);
+                    try
+                    {
+                        var query = new QueryExpression("team")
+                        {
+                            ColumnSet = new ColumnSet("name", "teamtype"),
+                            Criteria = new FilterExpression
+                            {
+                                Conditions =
+                                {
+                                    new ConditionExpression("businessunitid",
+                                        ConditionOperator.Equal, businessUnitId)
+                                }
+                            },
+                            Orders = { new OrderExpression("name", OrderType.Ascending) }
+                        };
+                        args.Result = Service.RetrieveMultiple(query);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Failed to load Teams. " +
+                            $"Ensure you have 'Read' privilege on Team entity.\n\n" +
+                            $"Details: {ex.Message}", ex);
+                    }
                 },
                 PostWorkCallBack = (args) =>
                 {
                     if (args.Error != null)
                     {
-                        MessageBox.Show(args.Error.Message, "Error",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ShowErrorDialog(args.Error, "Team Load Error");
                         return;
                     }
 
-                    EntityCollection members = (EntityCollection)args.Result;
+                    var teams = ((EntityCollection)args.Result).Entities;
+                    listViewTeams.Items.Clear();
 
+                    foreach (var team in teams)
+                    {
+                        var name = team.GetAttributeValue<string>("name") ?? "";
+                        var teamType = team.GetAttributeValue<OptionSetValue>("teamtype");
+                        var typeLabel = teamType?.Value == 0 ? "Owner" :
+                                        teamType?.Value == 1 ? "Access" :
+                                        teamType?.Value == 2 ? "AAD Security" :
+                                        teamType?.Value == 3 ? "AAD Office" : "Other";
+
+                        var item = new ListViewItem(name) { Tag = team.Id };
+                        item.SubItems.Add(typeLabel);
+                        listViewTeams.Items.Add(item);
+                    }
+
+                    lblTeams.Text = $"👥 Teams ({teams.Count})";
+                }
+            });
+        }
+
+        #endregion
+
+        #region Team Selected → Load Users
+
+        private void listViewTeams_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listViewTeams.SelectedItems.Count == 0) return;
+
+            var selectedTeamId = (Guid)listViewTeams.SelectedItems[0].Tag;
+            listViewUsers.Items.Clear();
+
+            LoadUsersForTeam(selectedTeamId);
+        }
+
+        private void LoadUsersForTeam(Guid teamId)
+        {
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Loading Users...",
+                Work = (worker, args) =>
+                {
+                    try
+                    {
+                        var query = new QueryExpression("systemuser")
+                        {
+                            ColumnSet = new ColumnSet("fullname", "internalemailaddress"),
+                            LinkEntities =
+                            {
+                                new LinkEntity("systemuser", "teammembership",
+                                    "systemuserid", "systemuserid", JoinOperator.Inner)
+                                {
+                                    LinkCriteria = new FilterExpression
+                                    {
+                                        Conditions =
+                                        {
+                                            new ConditionExpression("teamid",
+                                                ConditionOperator.Equal, teamId)
+                                        }
+                                    }
+                                }
+                            },
+                            Orders = { new OrderExpression("fullname", OrderType.Ascending) }
+                        };
+                        args.Result = Service.RetrieveMultiple(query);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Failed to load Users. " +
+                            $"Ensure you have 'Read' privilege on User entity.\n\n" +
+                            $"Details: {ex.Message}", ex);
+                    }
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        ShowErrorDialog(args.Error, "User Load Error");
+                        return;
+                    }
+
+                    var users = ((EntityCollection)args.Result).Entities;
                     listViewUsers.Items.Clear();
 
-                    foreach (Entity user in members.Entities)
+                    foreach (var user in users)
                     {
-                        string userName = user.GetAttributeValue<string>("fullname");
-                        string email = user.GetAttributeValue<string>("internalemailaddress");
+                        var name = user.GetAttributeValue<string>("fullname") ?? "";
+                        var email = user.GetAttributeValue<string>("internalemailaddress") ?? "";
 
-                        ListViewItem item = new ListViewItem(userName);
-                        item.SubItems.Add(email ?? "");
-                        item.Tag = user.Id;
+                        var item = new ListViewItem(name);
+                        item.SubItems.Add(email);
                         listViewUsers.Items.Add(item);
                     }
 
-                    lblUsers.Text = "Team Members (" + members.Entities.Count + ") - " + selectedTeamName;
+                    lblUsers.Text = $"👤 Users ({users.Count})";
                 }
             });
         }
 
-        // ========== GET TEAM TYPE NAME ==========
-        private string GetTeamTypeName(OptionSetValue teamType)
-        {
-            if (teamType == null)
-                return "Unknown";
+        #endregion
 
-            switch (teamType.Value)
-            {
-                case 0: return "Owner";
-                case 1: return "Access";
-                case 2: return "AAD Security Group";
-                case 3: return "AAD Office Group";
-                default: return "Other";
-            }
-        }
+        #region Export
 
-        // ========== EXPORT ONLY SELECTED BU + SELECTED TEAM + USERS ==========
         private void btnExport_Click(object sender, EventArgs e)
         {
-            // Validate: Must have selected a BU
-            if (listViewBU.SelectedItems.Count == 0)
-            {
-                MessageBox.Show("Please select a Business Unit first.", "Warning",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            // Validate: Must have users showing
-            if (listViewUsers.Items.Count == 0)
-            {
-                MessageBox.Show("No users to export. Select a BU or Team first.", "Warning",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            // Get selected BU name
-            string selectedBUName = listViewBU.SelectedItems[0].Text;
-
-            // Get selected Team name (if any)
-            string selectedTeamName = "";
-            string selectedTeamType = "";
-            if (listViewTeams.SelectedItems.Count > 0)
-            {
-                selectedTeamName = listViewTeams.SelectedItems[0].Text;
-                selectedTeamType = listViewTeams.SelectedItems[0].SubItems.Count > 1
-                    ? listViewTeams.SelectedItems[0].SubItems[1].Text
-                    : "";
-            }
-
-            SaveFileDialog saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "CSV Files (*.csv)|*.csv";
-            saveDialog.FileName = "BU_Hierarchy_" + selectedBUName.Replace(" ", "_") + ".csv";
-            saveDialog.Title = "Export Selected Hierarchy";
-
-            if (saveDialog.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendLine("Business Unit,Team Name,Team Type,User Name,Email");
-
-                    // Export each user currently shown in the Users panel
-                    foreach (ListViewItem userItem in listViewUsers.Items)
-                    {
-                        string userName = userItem.Text;
-                        string email = userItem.SubItems.Count > 1 ? userItem.SubItems[1].Text : "";
-
-                        sb.AppendLine(
-                            EscapeCsv(selectedBUName) + "," +
-                            EscapeCsv(selectedTeamName) + "," +
-                            EscapeCsv(selectedTeamType) + "," +
-                            EscapeCsv(userName) + "," +
-                            EscapeCsv(email)
-                        );
-                    }
-
-                    File.WriteAllText(saveDialog.FileName, sb.ToString());
-
-                    MessageBox.Show(
-                        "Export completed successfully!\n\n" +
-                        "Business Unit: " + selectedBUName + "\n" +
-                        (string.IsNullOrEmpty(selectedTeamName) ? "All BU Users" : "Team: " + selectedTeamName) + "\n" +
-                        "Users Exported: " + listViewUsers.Items.Count + "\n\n" +
-                        "File: " + saveDialog.FileName,
-                        "Export Success",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    LogInfo("Exported to: " + saveDialog.FileName);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Export failed: " + ex.Message, "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
+            MessageBox.Show("Export feature coming soon!", "Export",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // ========== CSV ESCAPE HELPER ==========
-        private string EscapeCsv(string value)
+        #endregion
+
+        #region Helper: Error Dialog
+
+        /// <summary>
+        /// Shows a detailed error dialog with friendly message
+        /// </summary>
+        private void ShowErrorDialog(Exception ex, string title)
         {
-            if (string.IsNullOrEmpty(value))
-                return "";
+            var message = ex.Message;
 
-            if (value.Contains(",") || value.Contains("\"") || value.Contains("\n"))
+            // Detect common Dataverse security errors
+            if (message.Contains("SecLib::AccessCheckEx"))
             {
-                return "\"" + value.Replace("\"", "\"\"") + "\"";
+                message = "🔒 ACCESS DENIED\n\n" +
+                    "Your Dynamics 365 security role does not have permission " +
+                    "to read this data.\n\n" +
+                    "Required privileges:\n" +
+                    "• Business Unit → Read (Organization level)\n" +
+                    "• Team → Read (Organization level)\n" +
+                    "• User → Read (Organization level)\n\n" +
+                    "Contact your System Administrator to update your security role.";
+            }
+            else if (message.Contains("401") || message.Contains("Unauthorized"))
+            {
+                message = "🔒 AUTHENTICATION EXPIRED\n\n" +
+                    "Your session has expired. Please reconnect to the organization.";
+            }
+            else if (message.Contains("403") || message.Contains("Forbidden"))
+            {
+                message = "🔒 FORBIDDEN\n\n" +
+                    "You don't have access to this Dynamics 365 environment.";
             }
 
-            return value;
+            MessageBox.Show(message, title,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+
+        #endregion
     }
 }

@@ -6,7 +6,7 @@ namespace BUSecurityHierarchy
 {
     [Export(typeof(IXrmToolBoxPlugin)),
         ExportMetadata("Name", "BU Security Hierarchy"),
-        ExportMetadata("Description", "Generates Business units Hierarchy like BU --> Teams --> Users from Dynamics"),
+        ExportMetadata("Description", "Visualize Dynamics 365 Business Unit → Team → User hierarchy in a tree structure"),
         ExportMetadata("SmallImageBase64", null),
         ExportMetadata("BigImageBase64", null),
         ExportMetadata("BackgroundColor", "Lavender"),

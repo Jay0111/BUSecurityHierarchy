@@ -20,12 +20,14 @@
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.btnLoadHierarchy = new System.Windows.Forms.ToolStripButton();
             this.btnExport = new System.Windows.Forms.ToolStripButton();
+            this.btnExpandAll = new System.Windows.Forms.ToolStripButton();
+            this.btnCollapseAll = new System.Windows.Forms.ToolStripButton();
             this.mainTableLayout = new System.Windows.Forms.TableLayoutPanel();
 
-            // Left Panel - Business Units
+            // Left Panel - Business Units (TreeView)
             this.panelBU = new System.Windows.Forms.Panel();
             this.lblBU = new System.Windows.Forms.Label();
-            this.listViewBU = new System.Windows.Forms.ListView();
+            this.treeViewBU = new System.Windows.Forms.TreeView();
 
             // Middle Panel - Teams
             this.panelTeams = new System.Windows.Forms.Panel();
@@ -47,7 +49,10 @@
             // ========== ToolStrip ==========
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
                 this.btnLoadHierarchy,
-                this.btnExport
+                this.btnExport,
+                new System.Windows.Forms.ToolStripSeparator(),
+                this.btnExpandAll,
+                this.btnCollapseAll
             });
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
@@ -66,6 +71,18 @@
             this.btnExport.Text = "📥 Export";
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
 
+            // btnExpandAll
+            this.btnExpandAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExpandAll.Name = "btnExpandAll";
+            this.btnExpandAll.Text = "➕ Expand All";
+            this.btnExpandAll.Click += new System.EventHandler(this.btnExpandAll_Click);
+
+            // btnCollapseAll
+            this.btnCollapseAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnCollapseAll.Name = "btnCollapseAll";
+            this.btnCollapseAll.Text = "➖ Collapse All";
+            this.btnCollapseAll.Click += new System.EventHandler(this.btnCollapseAll_Click);
+
             // ========== Main TableLayoutPanel (3 columns) ==========
             this.mainTableLayout.ColumnCount = 3;
             this.mainTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
@@ -81,7 +98,7 @@
             this.mainTableLayout.Controls.Add(this.panelTeams, 1, 0);
             this.mainTableLayout.Controls.Add(this.panelUsers, 2, 0);
 
-            // ========== Left Panel - Business Units ==========
+            // ========== Left Panel - Business Units (TreeView) ==========
             this.lblBU.Text = "📂 Business Units";
             this.lblBU.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblBU.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
@@ -91,19 +108,21 @@
             this.lblBU.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
             this.lblBU.Name = "lblBU";
 
-            this.listViewBU.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewBU.View = System.Windows.Forms.View.Details;
-            this.listViewBU.FullRowSelect = true;
-            this.listViewBU.GridLines = true;
-            this.listViewBU.Name = "listViewBU";
-            this.listViewBU.Columns.Add("Business Unit Name", 250);
-            this.listViewBU.SelectedIndexChanged += new System.EventHandler(this.listViewBU_SelectedIndexChanged);
+            this.treeViewBU.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewBU.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.treeViewBU.ItemHeight = 24;
+            this.treeViewBU.ShowLines = true;
+            this.treeViewBU.ShowPlusMinus = true;
+            this.treeViewBU.ShowRootLines = true;
+            this.treeViewBU.HideSelection = false;
+            this.treeViewBU.Name = "treeViewBU";
+            this.treeViewBU.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewBU_AfterSelect);
 
             this.panelBU.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelBU.Margin = new System.Windows.Forms.Padding(3);
             this.panelBU.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelBU.Name = "panelBU";
-            this.panelBU.Controls.Add(this.listViewBU);
+            this.panelBU.Controls.Add(this.treeViewBU);
             this.panelBU.Controls.Add(this.lblBU);
 
             // ========== Middle Panel - Teams ==========
@@ -181,12 +200,14 @@
         private System.Windows.Forms.ToolStrip toolStripMenu;
         private System.Windows.Forms.ToolStripButton btnLoadHierarchy;
         private System.Windows.Forms.ToolStripButton btnExport;
+        private System.Windows.Forms.ToolStripButton btnExpandAll;
+        private System.Windows.Forms.ToolStripButton btnCollapseAll;
         private System.Windows.Forms.TableLayoutPanel mainTableLayout;
 
         // Left Panel
         private System.Windows.Forms.Panel panelBU;
         private System.Windows.Forms.Label lblBU;
-        private System.Windows.Forms.ListView listViewBU;
+        private System.Windows.Forms.TreeView treeViewBU;
 
         // Middle Panel
         private System.Windows.Forms.Panel panelTeams;
