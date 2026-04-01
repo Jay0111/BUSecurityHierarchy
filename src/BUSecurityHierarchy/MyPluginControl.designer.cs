@@ -19,9 +19,9 @@
         {
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.btnLoadHierarchy = new System.Windows.Forms.ToolStripButton();
-            this.btnExport = new System.Windows.Forms.ToolStripButton();
             this.btnExpandAll = new System.Windows.Forms.ToolStripButton();
             this.btnCollapseAll = new System.Windows.Forms.ToolStripButton();
+            this.btnExport = new System.Windows.Forms.ToolStripButton();
             this.mainTableLayout = new System.Windows.Forms.TableLayoutPanel();
 
             // Left Panel - Business Units (TreeView)
@@ -49,10 +49,9 @@
             // ========== ToolStrip ==========
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
                 this.btnLoadHierarchy,
-                this.btnExport,
-                new System.Windows.Forms.ToolStripSeparator(),
                 this.btnExpandAll,
-                this.btnCollapseAll
+                this.btnCollapseAll,
+                this.btnExport
             });
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
@@ -62,26 +61,26 @@
             // btnLoadHierarchy
             this.btnLoadHierarchy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnLoadHierarchy.Name = "btnLoadHierarchy";
-            this.btnLoadHierarchy.Text = "🔄 Load BU Hierarchy";
+            this.btnLoadHierarchy.Text = "Load BU Hierarchy";
             this.btnLoadHierarchy.Click += new System.EventHandler(this.btnLoadHierarchy_Click);
-
-            // btnExport
-            this.btnExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnExport.Name = "btnExport";
-            this.btnExport.Text = "📥 Export";
-            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
 
             // btnExpandAll
             this.btnExpandAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnExpandAll.Name = "btnExpandAll";
-            this.btnExpandAll.Text = "➕ Expand All";
+            this.btnExpandAll.Text = "Expand All";
             this.btnExpandAll.Click += new System.EventHandler(this.btnExpandAll_Click);
 
             // btnCollapseAll
             this.btnCollapseAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnCollapseAll.Name = "btnCollapseAll";
-            this.btnCollapseAll.Text = "➖ Collapse All";
+            this.btnCollapseAll.Text = "Collapse All";
             this.btnCollapseAll.Click += new System.EventHandler(this.btnCollapseAll_Click);
+
+            // btnExport
+            this.btnExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Text = "Export";
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
 
             // ========== Main TableLayoutPanel (3 columns) ==========
             this.mainTableLayout.ColumnCount = 3;
@@ -99,7 +98,7 @@
             this.mainTableLayout.Controls.Add(this.panelUsers, 2, 0);
 
             // ========== Left Panel - Business Units (TreeView) ==========
-            this.lblBU.Text = "📂 Business Units";
+            this.lblBU.Text = "Business Units";
             this.lblBU.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblBU.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.lblBU.Height = 30;
@@ -109,13 +108,8 @@
             this.lblBU.Name = "lblBU";
 
             this.treeViewBU.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeViewBU.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.treeViewBU.ItemHeight = 24;
-            this.treeViewBU.ShowLines = true;
-            this.treeViewBU.ShowPlusMinus = true;
-            this.treeViewBU.ShowRootLines = true;
-            this.treeViewBU.HideSelection = false;
             this.treeViewBU.Name = "treeViewBU";
+            this.treeViewBU.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.treeViewBU.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewBU_AfterSelect);
 
             this.panelBU.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -126,7 +120,7 @@
             this.panelBU.Controls.Add(this.lblBU);
 
             // ========== Middle Panel - Teams ==========
-            this.lblTeams.Text = "👥 Teams";
+            this.lblTeams.Text = "Teams";
             this.lblTeams.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblTeams.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.lblTeams.Height = 30;
@@ -152,7 +146,7 @@
             this.panelTeams.Controls.Add(this.lblTeams);
 
             // ========== Right Panel - Users ==========
-            this.lblUsers.Text = "👤 Users";
+            this.lblUsers.Text = "Users";
             this.lblUsers.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblUsers.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.lblUsers.Height = 30;
@@ -199,9 +193,9 @@
 
         private System.Windows.Forms.ToolStrip toolStripMenu;
         private System.Windows.Forms.ToolStripButton btnLoadHierarchy;
-        private System.Windows.Forms.ToolStripButton btnExport;
         private System.Windows.Forms.ToolStripButton btnExpandAll;
         private System.Windows.Forms.ToolStripButton btnCollapseAll;
+        private System.Windows.Forms.ToolStripButton btnExport;
         private System.Windows.Forms.TableLayoutPanel mainTableLayout;
 
         // Left Panel
