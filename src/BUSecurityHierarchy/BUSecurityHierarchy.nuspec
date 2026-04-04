@@ -10,6 +10,7 @@
     <description>XrmToolBox plugin to visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
     <summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
 	  <releaseNotes>
+		  v1.0.3 - Added XrmToolBox dependency, fixed TreeView for BU hierarchy, added plugin icon with Base64 encoding
 		  v1.0.2 - Updated target framework to net48, fixed README
 		  v1.0.1 - Added README to package
 		  v1.0.0 - Initial Release
