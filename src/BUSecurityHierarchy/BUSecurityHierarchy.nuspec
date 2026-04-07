@@ -1,35 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
-  <metadata>
-    <id>Jay0111.XrmToolBox.BUSecurityHierarchy</id>
-	  <version>1.0.3</version>
-	  <title>BU Security Hierarchy Viewer</title>
-    <authors>Thota Jayadev</authors>
-    <owners>Thota Jayadev</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>XrmToolBox plugin to visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
-    <summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
-	  <releaseNotes>
-		  v1.0.2 - Updated target framework to net48, fixed README
-		  v1.0.1 - Added README to package
-		  v1.0.0 - Initial Release
-	  </releaseNotes>
-	  <language>en-US</language>
-    <projectUrl>https://github.com/Jay0111/BUSecurityHierarchy</projectUrl>
-    <icon>images\icon.png</icon>
-    <readme>docs\README.md</readme>
-    <license type="expression">MIT</license>
-    <tags>XrmToolBox Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform</tags>
-    <repository type="git" url="https://github.com/Jay0111/BUSecurityHierarchy.git" />
-	  <dependencies>
-		  <group targetFramework="net48">
-			  <dependency id="XrmToolBoxPackage" version="1.2023.10.67" />
-		  </group>
-	  </dependencies>
-  </metadata>
-  <files>
-    <file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net48" />
-    <file src="Resources\icon.png" target="images\icon.png" />
-    <file src="..\..\README.md" target="docs\README.md" />
-  </files>
+	<metadata>
+		<id>Jay0111.XrmToolBox.BUSecurityHierarchy</id>
+		<version>1.0.4</version>
+		<title>BU Security Hierarchy Viewer</title>
+		<authors>Thota Jayadev</authors>
+		<owners>Thota Jayadev</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>XrmToolBox plugin to visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
+		<summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
+		<releaseNotes>
+			v1.0.4 - Fixed NuGet package discovery for XrmToolBox Tool Library
+			v1.0.3 - Added XrmToolBox dependency, fixed TreeView for BU hierarchy, added plugin icon with Base64 encoding
+			v1.0.2 - Updated target framework to net48, fixed README
+			v1.0.1 - Added README to package
+			v1.0.0 - Initial Release
+		</releaseNotes>
+		<language>en-US</language>
+		<projectUrl>https://github.com/Jay0111/BUSecurityHierarchy</projectUrl>
+		<icon>images\icon.png</icon>
+		<readme>docs\README.md</readme>
+		<license type="expression">MIT</license>
+		<tags>XrmToolBox Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform Plugin</tags>
+		<repository type="git" url="https://github.com/Jay0111/BUSecurityHierarchy.git" />
+		<dependencies>
+			<dependency id="XrmToolBoxPackage" version="1.2023.10.67" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net48" />
+		<file src="Resources\icon.png" target="images\icon.png" />
+		<file src="..\..\README.md" target="docs\README.md" />
+	</files>
 </package>
