@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Drawing
 
-$outputPath = "c:\Users\thota.jayadev\source\repos\BUSecurityHierarchy\src\BUSecurityHierarchy\Resources\icon.png"
+$outputPath = "src\BUSecurityHierarchy\Resources\icon.png"
 
 $size = 128
 $bmp = New-Object System.Drawing.Bitmap($size, $size)
