@@ -31,7 +31,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net462\" />
+		<file src="bin\Release\BUSecurityHierarchy.dll" target="plugins\" />
 		<file src="Resources\icon.png" target="images\icon.png" />
 		<file src="..\..\README.md" target="docs\README.md" />
 	</files>
