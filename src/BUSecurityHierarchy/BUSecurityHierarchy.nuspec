@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>Jay0111.XrmToolBox.BUSecurityHierarchy</id>
-		<version>1.0.7</version>
+		<version>1.0.8</version>
 		<title>BU Security Hierarchy Viewer</title>
 		<authors>Thota Jayadev</authors>
 		<owners>Thota Jayadev</owners>
@@ -10,6 +10,7 @@
 		<description>XrmToolBox plugin to visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
 		<summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
 		<releaseNotes>
+			v1.0.8 - Updated XrmToolBox target path, 
 			v1.0.7 - Updated XrmToolBox dependency to latest version for Tool Library compatibility latest version
 			v1.0.6 - Updated XrmToolBox dependency to latest version for Tool Library compatibility latest version
 			v1.0.5 - Updated XrmToolBox dependency to latest version for Tool Library compatibility
@@ -31,7 +32,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net462\" />
+		<file src="bin\Release\BUSecurityHierarchy.dll" target="plugins\" />
 		<file src="Resources\icon.png" target="images\icon.png" />
 		<file src="..\..\README.md" target="docs\README.md" />
 	</files>
