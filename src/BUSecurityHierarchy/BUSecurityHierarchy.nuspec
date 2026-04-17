@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>Jay0111.XrmToolBox.BUSecurityHierarchy</id>
-		<version>1.0.9</version>
+		<version>1.0.14</version>
 		<title>BU Security Hierarchy Viewer</title>
 		<authors>Thota Jayadev</authors>
 		<owners>Thota Jayadev</owners>
@@ -10,6 +10,11 @@
 		<description>XrmToolBox plugin to visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
 		<summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
 		<releaseNotes>
+			v1.0.14 - Fixed dependency to use correct XrmToolBox package name, major cleanup removed 50+ unnecessary packages and references
+			v1.0.13 - CRITICAL FIX: Changed target folder from 'plugins' to 'Plugins' (capital P) as required by XrmToolBox for Tool Library discovery
+			v1.0.12 - Fixed XrmToolBox dependency version to use minimum version range for better compatibility, fixed README path
+			v1.0.11 - Fixed package to include only plugin DLL (excluded SDK assemblies)
+			v1.0.10 - Updated XrmToolBox dependency to Minimum version for Tool Library compatibility
 			v1.0.9 - Cleaned up plugin metadata, ensured Tool Library compatibility
 			v1.0.8 - Updated XrmToolBox target path,
 			v1.0.7 - Updated XrmToolBox dependency to latest version for Tool Library compatibility latest version
@@ -23,18 +28,15 @@
 		</releaseNotes>
 		<language>en-US</language>
 		<projectUrl>https://github.com/Jay0111/BUSecurityHierarchy</projectUrl>
-		<icon>images\icon.png</icon>
+		<icon>Resources\icon.png</icon>
 		<readme>docs\README.md</readme>
 		<license type="expression">MIT</license>
-		<tags>XrmToolBox XrmToolBox-Plugin Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform Plugin</tags>
+		<tags>XrmToolBox Plugin Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform</tags>
 		<repository type="git" url="https://github.com/Jay0111/BUSecurityHierarchy.git" />
-		<dependencies>
-			<dependency id="XrmToolBoxPackage" version="1.2025.10.74" />
-		</dependencies>
 	</metadata>
 	<files>
-		<file src="bin\Release\BUSecurityHierarchy.dll" target="plugins\" />
-		<file src="Resources\icon.png" target="images\icon.png" />
+		<file src="bin\Release\BUSecurityHierarchy.dll" target="Plugins\" />
+		<file src="Resources\icon.png" target="Resources" />
 		<file src="..\..\README.md" target="docs\README.md" />
 	</files>
 </package>
