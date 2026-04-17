@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>Jay0111.XrmToolBox.BUSecurityHierarchy</id>
-		<version>1.0.13</version>
+		<version>1.0.14</version>
 		<title>BU Security Hierarchy Viewer</title>
 		<authors>Thota Jayadev</authors>
 		<owners>Thota Jayadev</owners>
@@ -10,6 +10,7 @@
 		<description>XrmToolBox plugin to visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
 		<summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
 		<releaseNotes>
+			v1.0.14 - Fixed dependency to use correct XrmToolBox package name, major cleanup removed 50+ unnecessary packages and references
 			v1.0.13 - CRITICAL FIX: Changed target folder from 'plugins' to 'Plugins' (capital P) as required by XrmToolBox for Tool Library discovery
 			v1.0.12 - Fixed XrmToolBox dependency version to use minimum version range for better compatibility, fixed README path
 			v1.0.11 - Fixed package to include only plugin DLL (excluded SDK assemblies)
@@ -32,9 +33,6 @@
 		<license type="expression">MIT</license>
 		<tags>XrmToolBox Plugin Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform Plugin</tags>
 		<repository type="git" url="https://github.com/Jay0111/BUSecurityHierarchy.git" />
-		<dependencies>
-			<dependency id="XrmToolBox" version="[1.2025.9.64,)" />
-		</dependencies>
 	</metadata>
 	<files>
 		<file src="bin\Release\BUSecurityHierarchy.dll" target="Plugins\" />
