@@ -10,7 +10,7 @@
 		<description>Visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
 		<summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
 		<releaseNotes>
-			v1.0.16 - Added Xrm tool Box dependency
+			v1.0.16 - Added XrmtoolBox dependency
 			v1.0.15 - Fixed target path
 			v1.0.14 - Fixed dependency to use correct XrmToolBox package name, major cleanup removed 50+ unnecessary packages and references
 			v1.0.13 - CRITICAL FIX: Changed target folder from 'plugins' to 'Plugins' (capital P) as required by XrmToolBox for Tool Library discovery
@@ -41,7 +41,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net48\" />
+		<file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net48\Plugins\BUSecurityHierarchy.dll" />
 		<file src="Resources\icon.png" target="Resources" />
 		<file src="..\..\README.md" target="docs\README.md" />
 	</files>
