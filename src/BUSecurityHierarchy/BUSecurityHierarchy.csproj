@@ -43,7 +43,6 @@
       <HintPath>..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.59\lib\net462\Microsoft.Xrm.Sdk.dll</HintPath>
       <Private>False</Private>
     </Reference>
-
     <!-- XrmToolBox References - From NuGet, not packaged (provided at runtime) -->
     <Reference Include="McTools.Xrm.Connection">
       <HintPath>..\packages\XrmToolBoxPackage.1.2023.10.67\lib\net462\McTools.Xrm.Connection.dll</HintPath>
@@ -53,13 +52,11 @@
       <HintPath>..\packages\XrmToolBoxPackage.1.2023.10.67\lib\net462\XrmToolBox.Extensibility.dll</HintPath>
       <Private>False</Private>
     </Reference>
-
     <!-- Newtonsoft.Json - Dependency, not packaged (provided by XrmToolBox) -->
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
-
     <!-- .NET Framework References (built-in) -->
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
