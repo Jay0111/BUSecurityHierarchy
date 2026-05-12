@@ -1,15 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>Jay0111.XrmToolBox.BUSecurityHierarchy</id>
-		<version>1.0.14</version>
+		<version>1.0.16</version>
 		<title>BU Security Hierarchy Viewer</title>
 		<authors>Thota Jayadev</authors>
 		<owners>Thota Jayadev</owners>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>XrmToolBox plugin to visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
+		<description>Visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
 		<summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
 		<releaseNotes>
+			v1.0.16 - Added XrmtoolBox dependency
+			v1.0.15 - Fixed target path
 			v1.0.14 - Fixed dependency to use correct XrmToolBox package name, major cleanup removed 50+ unnecessary packages and references
 			v1.0.13 - CRITICAL FIX: Changed target folder from 'plugins' to 'Plugins' (capital P) as required by XrmToolBox for Tool Library discovery
 			v1.0.12 - Fixed XrmToolBox dependency version to use minimum version range for better compatibility, fixed README path
@@ -31,11 +33,15 @@
 		<icon>Resources\icon.png</icon>
 		<readme>docs\README.md</readme>
 		<license type="expression">MIT</license>
-		<tags>XrmToolBox Plugin Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform</tags>
-		<repository type="git" url="https://github.com/Jay0111/BUSecurityHierarchy.git" />
+		<tags>XrmToolBox Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform</tags>
+		<dependencies>
+			<group targetFramework=".NETFramework4.8">
+				<dependency id="XrmToolBox" version="1.2025.9.64" />
+			</group>
+		</dependencies>
 	</metadata>
 	<files>
-		<file src="bin\Release\BUSecurityHierarchy.dll" target="Plugins\" />
+		<file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net48\Plugins\BUSecurityHierarchy.dll" />
 		<file src="Resources\icon.png" target="Resources" />
 		<file src="..\..\README.md" target="docs\README.md" />
 	</files>
