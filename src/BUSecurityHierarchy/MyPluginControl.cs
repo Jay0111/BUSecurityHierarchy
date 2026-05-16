@@ -20,26 +20,6 @@ namespace BUSecurityHierarchy
         {
         }
 
-        #region Connection Handling
-
-        /// <summary>
-        /// This event fires when user connects/reconnects to a Dataverse org.
-        /// Provided FREE by PluginControlBase.
-        /// </summary>
-        public override void UpdateConnection(IOrganizationService newService,
-            ConnectionDetail detail, string actionName, object parameter)
-        {
-            // Call base to update the internal Service property
-            base.UpdateConnection(newService, detail, actionName, parameter);
-
-            // Optional: Show which org user connected to
-            LogInfo($"Connected to: {detail.WebApplicationUrl}");
-
-            // Optional: Auto-load hierarchy on new connection
-            // ExecuteMethod(LoadBUHierarchy);
-        }
-
-        #endregion
 
         #region Load BU Hierarchy
 
