@@ -43,7 +43,7 @@
       <Private>False</Private>
     </Reference>
     <!-- XrmToolBox References - From NuGet, not packaged (provided at runtime) -->
-   <Reference Include="McTools.Xrm.Connection, Version=1.2025.9.64, Culture=neutral, PublicKeyToken=96037217801d9658, processorArchitecture=MSIL">
+    <Reference Include="McTools.Xrm.Connection, Version=1.2025.9.64, Culture=neutral, PublicKeyToken=96037217801d9658, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\XRMToolbox\McTools.Xrm.Connection.dll</HintPath>
     </Reference>
@@ -92,7 +92,6 @@
       <DependentUpon>MyPluginControl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Resources\icon.png" />
   </ItemGroup>
