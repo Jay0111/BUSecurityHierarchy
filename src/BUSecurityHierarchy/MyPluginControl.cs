@@ -204,7 +204,8 @@ namespace BUSecurityHierarchy
                                         ConditionOperator.Equal, businessUnitId),
                                      new ConditionExpression("isdisabled", ConditionOperator.Equal, false)
                                 }
-                            }
+                            },
+                            Orders = { new OrderExpression("fullname", OrderType.Ascending) }
 
                         };
                         var users = Service.RetrieveMultiple(userQuery);
@@ -247,7 +248,7 @@ namespace BUSecurityHierarchy
                         item.SubItems.Add(typeLabel);
                         listViewTeams.Items.Add(item);
                     }
-                    DisplayUsers(users?.Entities?.ToList());
+                    DisplayUsers(users.Entities.ToList());
                     lblUsers.Text = $"👤 Users ({users.Entities.Count})";
                     lblTeams.Text = $"👥 Teams ({teams.Entities.Count})";
                 }
@@ -335,7 +336,7 @@ namespace BUSecurityHierarchy
         private void DisplayUsers(IEnumerable<Entity> users)
         {
             listViewUsers.Items.Clear();
-
+            if (users == null) return;
             foreach (var user in users)
             {
                 var item = new ListViewItem(user.GetAttributeValue<string>("fullname") ?? "N/A");

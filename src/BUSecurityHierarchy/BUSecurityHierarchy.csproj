@@ -204,7 +204,7 @@
 			xcopy "$(TargetDir)DocumentFormat.OpenXml.dll" "$(TargetDir)Plugins\" /Y /I
 			xcopy "$(TargetDir)ExcelNumberFormat.dll" "$(TargetDir)Plugins\" /Y /I
 			xcopy "$(TargetDir)SixLabors.Fonts.dll" "$(TargetDir)Plugins\" /Y /I
-			xcopy "$(TargetDir)Irony.NetCore.dll" "$(TargetDir)Plugins\" /Y /I
+			xcopy "$(TargetDir)Irony.dll" "$(TargetDir)Plugins\" /Y /I
 			xcopy "$(TargetDir)XLParser.dll" "$(TargetDir)Plugins\" /Y /I
 			)
 		</PostBuildEvent>
