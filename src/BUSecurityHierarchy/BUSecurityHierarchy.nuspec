@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>Jay0111.XrmToolBox.BUSecurityHierarchy</id>
-		<version>1.2026.5.2</version>
+		<version>1.2026.5.4</version>
 		<title>BU Security Hierarchy Viewer</title>
 		<authors>Thota Jayadev</authors>
 		<owners>Thota Jayadev</owners>
@@ -10,7 +10,7 @@
 		<description>Visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
 		<summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
 		<releaseNotes>
-			v1.2026.5.2 - Load all Teams, Users for selected BU
+			v1.2026.5.4 - Load all Teams, Users for selected BU
 			- Export all teams and Users 
 			- Export feature for selected team and users
 			v1.2026.5.1 - Initial release
@@ -30,14 +30,15 @@
 		<iconUrl>https://raw.githubusercontent.com/Jay0111/BUSecurityHierarchy/main/icon.png</iconUrl>
 		<tags>XrmToolBox Dynamics365 Dataverse BusinessUnit Security Hierarchy Teams Users PowerPlatform</tags>
 		<dependencies>
+			<group targetFramework="net48">
 				<dependency id="XrmToolBoxPackage" version="1.2023.10.67" />
-			<dependency id="ClosedXML" version="0.102.3" />
+				<dependency id="ClosedXML" version="0.102.3" />
+			</group>
 		</dependencies>
 	</metadata>
 	<files>
 		<file src="bin\Release\BUSecurityHierarchy.dll" target="lib\net48\Plugins\BUSecurityHierarchy.dll" />
 		<file src="Resources/icon.png" target="Resources/icon.png" />
 		<file src="..\..\README.md" target="docs\README.md" />
-		<file src="bin\Release\ClosedXML.dll" target="lib\net48\Plugins\ClosedXML.dll" />
 	</files>
 </package>

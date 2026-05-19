@@ -1,4 +1,4 @@
-# 🏢 BU Security Hierarchy Viewer
+ # 🏢 BU Security Hierarchy Viewer
 
 An **XrmToolBox** plugin to visualize the **Dynamics 365 / Dataverse** Business Unit → Team → User security hierarchy in an interactive tree view with **Excel export** capabilities.
 
@@ -14,9 +14,9 @@ An **XrmToolBox** plugin to visualize the **Dynamics 365 / Dataverse** Business 
 | ➕ **Expand / Collapse** | Expand or collapse all BU nodes with one click|
 | 📥 **Export** | Export teams & users to Excel with formatted worksheets |
 
----
+  ---
 
-## 📸 How It Works
+  ## 📸 How It Works
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -38,7 +38,7 @@ An **XrmToolBox** plugin to visualize the **Dynamics 365 / Dataverse** Business 
 
 **Flow:** Select a Business Unit → See its Teams and Users → Select a Team → See its Users
 
----
+  ---
 
   ## 📥 Export Capabilities
 
@@ -260,7 +260,7 @@ An **XrmToolBox** plugin to visualize the **Dynamics 365 / Dataverse** Business 
   ---
   📋 Version History
 
-  v1.2026.5.2 - May 2026
+  v1.2026.5.4 - May 2026
   - ✨ Added Excel export for selected team with users
   - ✨ Added Excel export for all teams and users in a BU
   - 📊 Multi-sheet workbook with Summary, Teams, and Users
