@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace BUSecurityHierarchy
 {
@@ -176,7 +178,7 @@ namespace BUSecurityHierarchy
                 {
                     try
                     {
-                        var query = new QueryExpression("team")
+                        var teamQuery = new QueryExpression("team")
                         {
                             ColumnSet = new ColumnSet("name", "teamtype"),
                             Criteria = new FilterExpression
@@ -189,7 +191,26 @@ namespace BUSecurityHierarchy
                             },
                             Orders = { new OrderExpression("name", OrderType.Ascending) }
                         };
-                        args.Result = Service.RetrieveMultiple(query);
+                        var teams = Service.RetrieveMultiple(teamQuery);
+
+                        var userQuery = new QueryExpression("systemuser")
+                        {
+                            ColumnSet = new ColumnSet("fullname", "internalemailaddress", "systemuserid"),
+                            Criteria = new FilterExpression
+                            {
+                                Conditions =
+                                {
+                                    new ConditionExpression("businessunitid",
+                                        ConditionOperator.Equal, businessUnitId),
+                                     new ConditionExpression("isdisabled", ConditionOperator.Equal, false)
+                                }
+                            },
+                            Orders = { new OrderExpression("fullname", OrderType.Ascending) }
+
+                        };
+                        var users = Service.RetrieveMultiple(userQuery);
+
+                        args.Result = new { Teams = teams, Users = users };
                     }
                     catch (Exception ex)
                     {
@@ -202,14 +223,19 @@ namespace BUSecurityHierarchy
                 {
                     if (args.Error != null)
                     {
-                        ShowErrorDialog(args.Error, "Team Load Error");
+                        ShowErrorDialog(args.Error, "Error in loading Teams Or Users : " + args.Error.Message);
                         return;
                     }
 
-                    var teams = ((EntityCollection)args.Result).Entities;
-                    listViewTeams.Items.Clear();
+                    dynamic result = args.Result;
+                    EntityCollection teams = result.Teams;
+                    EntityCollection users = result.Users;
 
-                    foreach (var team in teams)
+                    listViewTeams.Items.Clear();
+                    listViewUsers.Items.Clear();
+
+                    // Populate Teams
+                    foreach (var team in teams.Entities)
                     {
                         var name = team.GetAttributeValue<string>("name") ?? "";
                         var teamType = team.GetAttributeValue<OptionSetValue>("teamtype");
@@ -222,8 +248,9 @@ namespace BUSecurityHierarchy
                         item.SubItems.Add(typeLabel);
                         listViewTeams.Items.Add(item);
                     }
-
-                    lblTeams.Text = $"👥 Teams ({teams.Count})";
+                    DisplayUsers(users.Entities.ToList());
+                    lblUsers.Text = $"👤 Users ({users.Entities.Count})";
+                    lblTeams.Text = $"👥 Teams ({teams.Entities.Count})";
                 }
             });
         }
@@ -306,14 +333,299 @@ namespace BUSecurityHierarchy
             });
         }
 
+        private void DisplayUsers(IEnumerable<Entity> users)
+        {
+            listViewUsers.Items.Clear();
+            if (users == null) return;
+            foreach (var user in users)
+            {
+                var item = new ListViewItem(user.GetAttributeValue<string>("fullname") ?? "N/A");
+                item.SubItems.Add(user.GetAttributeValue<string>("internalemailaddress") ?? "");
+                item.Tag = user.Id; // Store user ID
+                listViewUsers.Items.Add(item);
+            }
+           
+            // Update status or label if you have one
+            // lblUsers.Text = $"Users ({listViewUsers.Items.Count})";
+        }
         #endregion
 
         #region Export
-
         private void btnExport_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Export feature coming soon!", "Export",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (listViewTeams.SelectedItems.Count > 0)
+            {
+                //Export selected team and Users
+                ExportSelectedTeam();
+            }
+            else if (treeViewBU.SelectedNode != null)
+            {
+                //Export all teams and Users
+                ExportAllUsersTeams();
+
+            }
+            else
+            {
+                MessageBox.Show("Please select a Business Unit or Team to export.", "No Selected",
+                                   MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+        }
+
+        private void ExportSelectedTeam()
+        { 
+            // Get selected team
+            var selectedTeam = listViewTeams.SelectedItems[0];
+            string teamName = selectedTeam.SubItems[0].Text;
+            string teamType = selectedTeam.SubItems.Count > 1 ? selectedTeam.SubItems[1].Text : "";
+
+            // File save dialog
+            using (SaveFileDialog saveDialog = new SaveFileDialog())
+            {
+                saveDialog.Filter = "Excel Files|*.xlsx";
+                saveDialog.Title = "Export Team and Users";
+                saveDialog.FileName = $"{SanitizeFileName(teamName)}_Users_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                if (saveDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                try
+                {
+                    using (var workbook = new XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Team Users");
+
+                        // Header: Team Information
+                        worksheet.Cell("A1").Value = "Team Name:";
+                        worksheet.Cell("B1").Value = teamName;
+                        worksheet.Cell("A2").Value = "Team Type:";
+                        worksheet.Cell("B2").Value = teamType;
+                        worksheet.Cell("A3").Value = "Export Date:";
+                        worksheet.Cell("B3").Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                        worksheet.Cell("A4").Value = "Total Users:";
+                        worksheet.Cell("B4").Value = listViewUsers.Items.Count;
+
+                        // Style team info
+                        worksheet.Range("A1:A4").Style.Font.Bold = true;
+                        worksheet.Range("A1:B4").Style.Fill.BackgroundColor = XLColor.LightGray;
+                        worksheet.Range("A1:B4").Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
+                        // User table headers (starting at row 6)
+                        worksheet.Cell("A6").Value = "User Name";
+                        worksheet.Cell("B6").Value = "Email";
+
+                        var headerRange = worksheet.Range("A6:B6");
+                        headerRange.Style.Font.Bold = true;
+                        headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4472C4");
+                        headerRange.Style.Font.FontColor = XLColor.White;
+                        headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Medium;
+
+                        // Populate user data
+                        int row = 7;
+                        foreach (ListViewItem userItem in listViewUsers.Items)
+                        {
+                            worksheet.Cell(row, 1).Value = userItem.SubItems[0].Text; // User Name
+                            worksheet.Cell(row, 2).Value = userItem.SubItems.Count > 1 ? userItem.SubItems[1].Text : ""; //Email
+                                                row++;
+                        }
+
+                        // Format user data table
+                        if (listViewUsers.Items.Count > 0)
+                        {
+                            var dataRange = worksheet.Range($"A7:B{row - 1}");
+                            dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                            dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Medium;
+                        }
+
+                        // Auto-fit columns
+                        worksheet.Columns().AdjustToContents();
+
+                        // Save workbook
+                        workbook.SaveAs(saveDialog.FileName);
+                    }
+
+                    MessageBox.Show($"Successfully exported {listViewUsers.Items.Count} users to:\n{saveDialog.FileName}",
+                        "Export Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error exporting to Excel:\n{ex.Message}\n\n{ex.StackTrace}",
+                        "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void ExportAllUsersTeams()
+        {
+            var selectedBUNode = treeViewBU.SelectedNode;
+            string buName = selectedBUNode.Text.Replace("📁 ", "").Replace("📂 ", "");
+            Guid buId = (Guid)selectedBUNode.Tag;
+
+            using (SaveFileDialog saveDialog = new SaveFileDialog())
+            {
+                saveDialog.Filter = "Excel Files|*.xlsx";
+                saveDialog.Title = "Export All Teams and Users";
+                saveDialog.FileName = $"{SanitizeFileName(buName)}_AllTeams_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                if (saveDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                WorkAsync(new WorkAsyncInfo
+                {
+                    Message = "Exporting all teams and users...",
+                    Work = (worker, args) =>
+                    {
+                        try
+                        {
+                            // Get all teams for this BU (same as UI)
+                            var teamQuery = new QueryExpression("team")
+                            {
+                                ColumnSet = new ColumnSet("teamid", "name", "teamtype"),
+                                Criteria = new FilterExpression
+                                {
+                                    Conditions =
+                              {
+                                  new ConditionExpression("businessunitid", ConditionOperator.Equal, buId)
+                              }
+                                },
+                                Orders = { new OrderExpression("name", OrderType.Ascending) }
+                            };
+                            var teams = Service.RetrieveMultiple(teamQuery).Entities;
+
+                            // Get all users for this BU (same as UI - match what's displayed)
+                            var userQuery = new QueryExpression("systemuser")
+                            {
+                                ColumnSet = new ColumnSet("systemuserid", "fullname", "internalemailaddress"),
+                                Criteria = new FilterExpression
+                                {
+                                    Conditions =
+                              {
+                                  new ConditionExpression("businessunitid", ConditionOperator.Equal, buId),
+                                  new ConditionExpression("isdisabled", ConditionOperator.Equal, false)
+                              }
+                                },
+                                Orders = { new OrderExpression("fullname", OrderType.Ascending) }
+                            };
+                            var users = Service.RetrieveMultiple(userQuery).Entities;
+
+                            args.Result = new
+                            {
+                                BUName = buName,
+                                Teams = teams,
+                                Users = users,
+                                FilePath = saveDialog.FileName
+                            };
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"Failed to retrieve data: {ex.Message}", ex);
+                        }
+                    },
+                    PostWorkCallBack = (args) =>
+                    {
+                        if (args.Error != null)
+                        {
+                            MessageBox.Show($"Error retrieving data:\n{args.Error.Message}",
+                                "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
+                        try
+                        {
+                            dynamic result = args.Result;
+                            string buNameExport = result.BUName;
+                            var teams = (DataCollection<Entity>)result.Teams;
+                            var users = (DataCollection<Entity>)result.Users;
+                            string filePath = result.FilePath;
+
+                            using (var workbook = new XLWorkbook())
+                            {
+                                // Sheet 1: Summary
+                                var summarySheet = workbook.Worksheets.Add("Summary");
+                                summarySheet.Cell("A1").Value = "Business Unit:";
+                                summarySheet.Cell("B1").Value = buNameExport;
+                                summarySheet.Cell("A2").Value = "Export Date:";
+                                summarySheet.Cell("B2").Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                                summarySheet.Cell("A3").Value = "Total Teams:";
+                                summarySheet.Cell("B3").Value = teams.Count;
+                                summarySheet.Cell("A4").Value = "Total Users:";
+                                summarySheet.Cell("B4").Value = users.Count;
+
+                                summarySheet.Range("A1:A4").Style.Font.Bold = true;
+                                summarySheet.Range("A1:B4").Style.Fill.BackgroundColor = XLColor.LightBlue;
+                                summarySheet.Columns().AdjustToContents();
+
+                                // Sheet 2: All Teams
+                                var teamsSheet = workbook.Worksheets.Add("Teams");
+                                teamsSheet.Cell("A1").Value = "Team Name";
+                                teamsSheet.Cell("B1").Value = "Team Type";
+
+                                var teamHeaderRange = teamsSheet.Range("A1:B1");
+                                teamHeaderRange.Style.Font.Bold = true;
+                                teamHeaderRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4472C4");
+                                teamHeaderRange.Style.Font.FontColor = XLColor.White;
+
+                                int teamRow = 2;
+                                foreach (var team in teams)
+                                {
+                                    var teamType = team.GetAttributeValue<OptionSetValue>("teamtype");
+                                    var typeLabel = teamType?.Value == 0 ? "Owner" :
+                                                  teamType?.Value == 1 ? "Access" :
+                                                  teamType?.Value == 2 ? "AAD Security" :
+                                                  teamType?.Value == 3 ? "AAD Office" : "Other";
+
+                                    teamsSheet.Cell(teamRow, 1).Value = team.GetAttributeValue<string>("name");
+                                    teamsSheet.Cell(teamRow, 2).Value = typeLabel;
+                                    teamRow++;
+                                }
+                                teamsSheet.Columns().AdjustToContents();
+
+                                // Sheet 3: All Users
+                                var usersSheet = workbook.Worksheets.Add("Users");
+                                usersSheet.Cell("A1").Value = "User Name";
+                                usersSheet.Cell("B1").Value = "Email";
+
+                                var userHeaderRange = usersSheet.Range("A1:B1");
+                                userHeaderRange.Style.Font.Bold = true;
+                                userHeaderRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4472C4");
+                                userHeaderRange.Style.Font.FontColor = XLColor.White;
+
+                                int userRow = 2;
+                                foreach (var user in users)
+                                {
+                                    usersSheet.Cell(userRow, 1).Value = user.GetAttributeValue<string>("fullname");
+                                    usersSheet.Cell(userRow, 2).Value =
+        user.GetAttributeValue<string>("internalemailaddress");
+                                    userRow++;
+                                }
+                                usersSheet.Columns().AdjustToContents();
+
+                                // Save workbook
+                                workbook.SaveAs(filePath);
+                            }
+
+                            MessageBox.Show($"Successfully exported:\n" +
+                                $"• {teams.Count} teams\n" +
+                                $"• {users.Count} users\n\n" +
+                                $"File: {filePath}",
+                                "Export Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Error creating Excel file:\n{ex.Message}\n\n{ex.StackTrace}",
+                                "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                });
+            }
+        }
+
+       
+
+        private string SanitizeFileName(string fileName)
+        {
+            var invalidChars = Path.GetInvalidFileNameChars();
+            return string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
         }
 
         #endregion
