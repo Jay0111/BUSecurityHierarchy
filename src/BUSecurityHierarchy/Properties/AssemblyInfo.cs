@@ -12,5 +12,5 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 // The following GUID is for the ID of the type lib if this project is exposed to COM
 [assembly: Guid("38989739-f8d4-497c-a622-9b9d82c10da6")]
-[assembly: AssemblyVersion("1.2026.5.2")]
-[assembly: AssemblyFileVersion("1.2026.5.2")]
+[assembly: AssemblyVersion("1.2026.5.3")]
+[assembly: AssemblyFileVersion("1.2026.5.3")]
