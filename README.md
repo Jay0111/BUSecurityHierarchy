@@ -260,7 +260,7 @@ An **XrmToolBox** plugin to visualize the **Dynamics 365 / Dataverse** Business 
   ---
   📋 Version History
 
-  v1.2026.5.2 - May 2026
+  v1.2026.5.4 - May 2026
   - ✨ Added Excel export for selected team with users
   - ✨ Added Excel export for all teams and users in a BU
   - 📊 Multi-sheet workbook with Summary, Teams, and Users
