@@ -11,7 +11,7 @@ An **XrmToolBox** plugin to visualize the **Dynamics 365 / Dataverse** Business 
 | 🌳 **BU Tree View** | Hierarchical tree of all Business Units (parent-child) |
 | 👥 **Teams List** | View all Teams under a selected Business Unit |
 | 👤 **Users List** | View all Users within a selected Team |
-| ➕ **Expand / Collapse** | Expand or collapse all BU nodes with one click |
+| ➕ **Expand / Collapse** | Expand or collapse all BU nodes with one click|
 | 📥 **Export** | Export teams & users to Excel with formatted worksheets |
 
 ---
