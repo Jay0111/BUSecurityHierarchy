@@ -1,20 +1,19 @@
 # Changelog
+ ## [1.2026.5.4] - 2026-05-19
 
-All notable changes to this project will be documented in this file.
+  ### Added
+  - Excel export for selected team with users
+  - Excel export for all teams and users in Business Unit
+  - Multi-sheet workbook with Summary, Teams, and Users
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/).
+  ### Fixed
+  - Resolved ClosedXML.dll file locking issue during plugin installation
 
----
+  ## [1.2026.5.1] - 2026-05-17
 
-## [Unreleased]
-- Placeholder for upcoming changes
-- Add new features, bug fixes, or improvements here
-
----
-
-## [1.0.0] - YYYY-MM-DD
-### Added
-- Initial release of **BUSecurityHierarchy** plugin
-- TreeView visualization of Business Units → Teams → Users
-- Read-only drill-down view for safe usage
+  ### Added
+  - Initial release
+  - Business Unit hierarchy tree view
+  - Teams list per BU
+  - Users list per Team
+  - Expand/Collapse controls
