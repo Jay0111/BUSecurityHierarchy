@@ -1,39 +1,42 @@
  # 🏢 BU Security Hierarchy Viewer
 
-  An **XrmToolBox** plugin to visualize the **Dynamics 365 / Dataverse** Business Unit → Team → User security hierarchy
-  in an interactive tree view with **Excel export** capabilities.
+An **XrmToolBox** plugin to visualize the **Dynamics 365 / Dataverse** Business Unit → Team → User security hierarchy in an interactive tree view with **Excel export** capabilities.
 
-  ---
+---
 
-  ## ✨ Features
+## ✨ Features
 
-  | Feature | Description |
-  |---------|-------------|
-  | 🌳 **BU Tree View** | Hierarchical tree of all Business Units (parent-child) |
-  | 👥 **Teams List** | View all Teams under a selected Business Unit |
-  | 👤 **Users List** | View all Users within a selected Team |
-  | ➕ **Expand / Collapse** | Expand or collapse all BU nodes with one click |
-  | 📥 **Export to Excel** | Export teams & users to Excel with formatted worksheets |
+| Feature | Description |
+|---------|-------------|
+| 🌳 **BU Tree View** | Hierarchical tree of all Business Units (parent-child) |
+| 👥 **Teams List** | View all Teams under a selected Business Unit |
+| 👤 **Users List** | View all Users within a selected Team |
+| ➕ **Expand / Collapse** | Expand or collapse all BU nodes with one click|
+| 📥 **Export** | Export teams & users to Excel with formatted worksheets |
 
   ---
 
   ## 📸 How It Works
 
- 
-  ╔════════════════════════════════════════════════════════════════════════╗
-  ║  BU Security Hierarchy Viewer                                          ║
-  ║  [🔄 Load BU Hierarchy]  [➕ Expand All]  [➖ Collapse All]  [📥 Export]║
-  ╠═══════════════╦═══════════════════╦════════════════════════════════════╣
-  ║  📂 Business  ║  👥 Teams         ║  👤 Users                          ║
-  ║     Units     ║                   ║                                    ║
-  ║               ║                   ║                                    ║
-  ║  📁 Contoso   ║  Team Name | Type ║  User Name      | Email           ║
-  ║   ├📁 Sales   ║  Sales Team|Owner ║  John Smith     | john@co..       ║
-  ║   ├📁 Support ║  West Team |Access║  Jane Doe       | jane@co..       ║
-  ║   └📁 HR      ║                   ║                                    ║
-  ║               ║                   ║                                    ║
-  ╚═══════════════╩═══════════════════╩════════════════════════════════════╝
-  **Flow:** Select a Business Unit → See its Teams and users → Select a Team → See its Users
+```
+┌─────────────────────────────────────────────────────────────┐
+│  BU Security Hierarchy Viewer                                            │
+│  [🔄 Load BU Hierarchy]  [➕ Expand All]  [➖ Collapse All] [📥 Export]│
+├──────────────┬──────────────────┬───────────────────────────┤
+│ 📂 Business  │ 👥 Teams         │ 👤 Users                  │
+│    Units     │                  │                           │
+│              │                  │                           │
+│ 📁 Contoso   │ Team Name | Type │ User Name   | Email       │
+│  ├📁 Sales   │ Sales Team|Owner │ John Smith  | john@co..   │
+│  ├📁 Support │ West Team |Access│ Jane Doe    | jane@co..   │
+│  └📁 HR      │           |      │             |             │
+│              │                  │                           │
+│ Select a BU  │ Select a Team    │ Users shown here          │
+│ to see Teams │ to see Users     │                           │
+└──────────────┴──────────────────┴───────────────────────────┘
+```
+
+**Flow:** Select a Business Unit → See its Teams and Users → Select a Team → See its Users
 
   ---
 
@@ -130,7 +133,7 @@
   | ✅ **Org Scoped** | Only reads data from YOUR connected Dynamics 365 org |
   | ✅ **Open Source** | Source code is fully open and auditable |
   | ✅ **Local Export** | Excel files saved only to locations you choose |
-  | ❌ **No Telemetry** | No tracking, analytics, or usage data collected|
+  | ❌ **No Telemetry** | No tracking, analytics, or usage data collected |
   | ❌ **No Cloud Storage** | Exported data stays on your local machine |
 
   ---
