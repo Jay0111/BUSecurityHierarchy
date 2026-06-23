@@ -1,4 +1,6 @@
-﻿namespace BUSecurityHierarchy
+﻿using System;
+
+namespace BUSecurityHierarchy
 {
     partial class MyPluginControl
     {
@@ -23,6 +25,7 @@
             this.btnCollapseAll = new System.Windows.Forms.ToolStripButton();
             this.btnExport = new System.Windows.Forms.ToolStripButton();
             this.mainTableLayout = new System.Windows.Forms.TableLayoutPanel();
+            this.rightPanelLayout = new System.Windows.Forms.TableLayoutPanel();
 
             // Left Panel - Business Units (TreeView)
             this.panelBU = new System.Windows.Forms.Panel();
@@ -39,11 +42,20 @@
             this.lblUsers = new System.Windows.Forms.Label();
             this.listViewUsers = new System.Windows.Forms.ListView();
 
+            //Right Panel Below - Security Roles
+            this.panelRoles = new System.Windows.Forms.Panel();
+            this.lblRoles = new System.Windows.Forms.Label();
+            this.lblRoleChangesWarning = new System.Windows.Forms.Label();
+            this.btnSaveRoles = new System.Windows.Forms.Button();
+            this.chkListRoles = new System.Windows.Forms.CheckedListBox();
+
             this.toolStripMenu.SuspendLayout();
             this.mainTableLayout.SuspendLayout();
+            this.rightPanelLayout.SuspendLayout();
             this.panelBU.SuspendLayout();
             this.panelTeams.SuspendLayout();
             this.panelUsers.SuspendLayout();
+            this.panelRoles.SuspendLayout();
             this.SuspendLayout();
 
             // ========== ToolStrip ==========
@@ -95,7 +107,20 @@
             this.mainTableLayout.Padding = new System.Windows.Forms.Padding(5);
             this.mainTableLayout.Controls.Add(this.panelBU, 0, 0);
             this.mainTableLayout.Controls.Add(this.panelTeams, 1, 0);
-            this.mainTableLayout.Controls.Add(this.panelUsers, 2, 0);
+            this.mainTableLayout.Controls.Add(this.rightPanelLayout, 2, 0);
+
+            //// ========== Right Panel Layout (Nested - 2 rows) ==========
+            this.rightPanelLayout.ColumnCount = 1;
+            this.rightPanelLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.rightPanelLayout.RowCount = 2;
+            this.rightPanelLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51F)); // For Users
+            this.rightPanelLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 49F)); // For Roles
+            this.rightPanelLayout.Margin = new System.Windows.Forms.Padding(0); 
+            this.rightPanelLayout.Padding = new System.Windows.Forms.Padding(0);
+            this.rightPanelLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rightPanelLayout.Name = "rightPanelLayout";
+            this.rightPanelLayout.Controls.Add(this.panelUsers, 0, 0);
+            this.rightPanelLayout.Controls.Add(this.panelRoles, 0, 1);
 
             // ========== Left Panel - Business Units (TreeView) ==========
             this.lblBU.Text = "Business Units";
@@ -164,11 +189,63 @@
             this.listViewUsers.Columns.Add("Email", 200);
 
             this.panelUsers.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelUsers.Margin = new System.Windows.Forms.Padding(3);
+            this.panelUsers.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
             this.panelUsers.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelUsers.Name = "panelUsers";
             this.panelUsers.Controls.Add(this.listViewUsers);
             this.panelUsers.Controls.Add(this.lblUsers);
+
+            // ==========  Right Panel Bottom - Security Roles ==========
+            this.lblRoles.Text = "🛡️ Security Roles";
+            this.lblRoles.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblRoles.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblRoles.Height = 30;
+            this.lblRoles.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.lblRoles.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblRoles.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.lblRoles.Margin = new System.Windows.Forms.Padding(0);
+            this.lblRoles.Name = "lblRoles";
+            //Warning Message 
+            this.lblRoleChangesWarning = new System.Windows.Forms.Label();
+            this.lblRoleChangesWarning.Text = "⚠️ You have unsaved changes. Click Save to apply or cancel to discard.";
+            this.lblRoleChangesWarning.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblRoleChangesWarning.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblRoleChangesWarning.Height = 25;
+            this.lblRoleChangesWarning.BackColor = System.Drawing.Color.Yellow;
+            this.lblRoleChangesWarning.ForeColor = System.Drawing.Color.DarkRed;
+            this.lblRoleChangesWarning.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblRoleChangesWarning.Visible = false; // Hidden by default
+            this.lblRoleChangesWarning.Name = "lblRoleChangesWarning";
+
+            this.chkListRoles.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chkListRoles.Name = "chkListRoles";
+            this.chkListRoles.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.chkListRoles.BorderStyle = System.Windows.Forms.BorderStyle.None; 
+            this.chkListRoles.Margin = new System.Windows.Forms.Padding(0); 
+            this.chkListRoles.IntegralHeight = false;
+            this.chkListRoles.CheckOnClick = true;
+            this.chkListRoles.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.chkListRoles_ItemCheck);
+
+            this.btnSaveRoles = new System.Windows.Forms.Button();
+            this.btnSaveRoles.Text = "💾 Save Role Changes";
+            this.btnSaveRoles.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btnSaveRoles.Height = 35;
+            this.btnSaveRoles.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnSaveRoles.BackColor = System.Drawing.Color.ForestGreen;
+            this.btnSaveRoles.ForeColor = System.Drawing.Color.White;
+            this.btnSaveRoles.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSaveRoles.Visible = false; // Hidden by default
+            this.btnSaveRoles.Name = "btnSaveRoles";
+            this.btnSaveRoles.Click += new System.EventHandler(this.btnSaveRoles_Click);
+
+            this.panelRoles.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelRoles.Margin = new System.Windows.Forms.Padding(0, 2, 0, 0);
+            this.panelRoles.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelRoles.Name = "panelRoles";
+            this.panelRoles.Controls.Add(this.chkListRoles);
+            this.panelRoles.Controls.Add(this.lblRoleChangesWarning);
+            this.panelRoles.Controls.Add(this.btnSaveRoles);
+            this.panelRoles.Controls.Add(this.lblRoles);
 
             // ========== MyPluginControl ==========
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -184,6 +261,8 @@
             this.panelBU.ResumeLayout(false);
             this.panelTeams.ResumeLayout(false);
             this.panelUsers.ResumeLayout(false);
+            this.panelRoles.ResumeLayout(false); 
+            this.rightPanelLayout.ResumeLayout(false);
             this.mainTableLayout.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -197,6 +276,13 @@
         private System.Windows.Forms.ToolStripButton btnCollapseAll;
         private System.Windows.Forms.ToolStripButton btnExport;
         private System.Windows.Forms.TableLayoutPanel mainTableLayout;
+        private System.Windows.Forms.TableLayoutPanel rightPanelLayout;
+
+        // Add these fields in the Designer.cs class
+        private System.Windows.Forms.Button btnSaveRoles;
+        private System.Windows.Forms.Label lblRoleChangesWarning;
+        private Guid? _selectedTeamId; // Track selected team
+        private bool _hasUnsavedChanges; // Track unsaved changes
 
         // Left Panel
         private System.Windows.Forms.Panel panelBU;
@@ -208,9 +294,13 @@
         private System.Windows.Forms.Label lblTeams;
         private System.Windows.Forms.ListView listViewTeams;
 
-        // Right Panel
+        // Right Panel 1
         private System.Windows.Forms.Panel panelUsers;
         private System.Windows.Forms.Label lblUsers;
         private System.Windows.Forms.ListView listViewUsers;
+        //Right Panel 2
+        private System.Windows.Forms.Panel panelRoles;
+        private System.Windows.Forms.Label lblRoles;
+        private System.Windows.Forms.CheckedListBox chkListRoles;
     }
 }
