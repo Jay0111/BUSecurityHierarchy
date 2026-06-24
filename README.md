@@ -350,7 +350,7 @@
   ---
   📋 Version History
 
-  v1.2026.6.23 - June 2026
+  v1.2026.6.3 - June 2026
 
   - ✨ Added Security Roles panel with checked list view
   - ✨ Role Assignment/Removal functionality with smart save detection
@@ -391,13 +391,6 @@
   - 📖 Read the Documentation (https://github.com/Jay0111/BUSecurityHierarchy#readme)
   - 🐛 Report an Issue (https://github.com/Jay0111/BUSecurityHierarchy/issues/new)
   - 💬 Ask a Question (https://github.com/Jay0111/BUSecurityHierarchy/discussions)
-  - 📧 Email: [your-email@example.com]
+  - 📧 Email: [jayadevthota23@gmail.com]
 
-  ---
-  <div align="center">
-
-  Made with ❤️ for the Dynamics 365 Community
-
-  ⬆ Back to Top (#-bu-security-hierarchy-viewer)
-
-  </div>
+  
