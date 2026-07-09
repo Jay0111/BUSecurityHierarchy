@@ -1212,7 +1212,7 @@ namespace BUSecurityHierarchy
                 // Only refresh if currently filtered
                 if (chkListRoles.Items.Count != _allRoles.Count)
                 {
-                    RefreshRolesList();
+                    RefreshRolesList();  
                 }
                 return;
             }
@@ -1224,9 +1224,11 @@ namespace BUSecurityHierarchy
             chkListRoles.ItemCheck -= chkListRoles_ItemCheck;
             chkListRoles.Items.Clear();
 
-            // Filter roles based on search query
+            // ✅ Filter AND sort roles based on search query
             var filteredRoles = _allRoles
                 .Where(r => r.RoleName.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0)
+                .OrderByDescending(r => r.IsChecked)  // ✅ Checked roles first
+                .ThenBy(r => r.RoleName)              // ✅ Then alphabetically
                 .ToList();
 
             // Add filtered roles back to the checkedlistbox
@@ -1251,7 +1253,13 @@ namespace BUSecurityHierarchy
             chkListRoles.ItemCheck -= chkListRoles_ItemCheck;
             chkListRoles.Items.Clear();
 
-            foreach (var role in _allRoles)
+            // ✅ ALWAYS SORT: checked roles first, then alphabetically
+            var sortedRoles = _allRoles
+                .OrderByDescending(r => r.IsChecked)
+                .ThenBy(r => r.RoleName)
+                .ToList();
+
+            foreach (var role in sortedRoles)
             {
                 chkListRoles.Items.Add(role, role.IsChecked);
             }
