@@ -2,14 +2,19 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>Jay0111.XrmToolBox.BUSecurityHierarchy</id>
-		<version>1.2026.5.4</version>
+		<version>1.2026.6.3</version>
 		<title>BU Security Hierarchy Viewer</title>
 		<authors>Thota Jayadev</authors>
 		<owners>Thota Jayadev</owners>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>Visualize Dynamics 365 Business Unit hierarchy with Teams and Users. Drill down from BU → Teams → Users in an interactive tree view.</description>
+		<description>Visualize Dynamics 365 Business Unit hierarchy with Teams and Users and Roles. Drill down from BU → Teams → Users and Roles in an interactive tree view. Manage Team Role Assignments</description>
 		<summary>View BU → Team → User security hierarchy in Dynamics 365</summary>
 		<releaseNotes>
+			v1.2026.6.3 - Fixed Bugs
+			v1.2026.6.1 - Added Security Roles section
+			- Display team security roles
+			- Assign/Remove security roles to selected team and save to Dynamics
+			- Export selected team, team users and security roles
 			v1.2026.5.4 - Load all Teams, Users for selected BU
 			- Export all teams and Users 
 			- Export feature for selected team and users

@@ -169,9 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MyPlugin.cs" />
-    <Compile Include="MyPluginControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="MyPluginControl.cs" />
     <Compile Include="MyPluginControl.designer.cs">
       <DependentUpon>MyPluginControl.cs</DependentUpon>
     </Compile>
@@ -193,8 +191,8 @@
     <EmbeddedResource Include="Resources\icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-	<PropertyGroup>
-		<PostBuildEvent>
+  <PropertyGroup>
+    <PostBuildEvent>
 			IF $(ConfigurationName) == Debug (
 			IF NOT EXIST Plugins mkdir Plugins
 			DEL $(TargetDir)Plugins\manifest.json
@@ -208,7 +206,7 @@
 			xcopy "$(TargetDir)XLParser.dll" "$(TargetDir)Plugins\" /Y /I
 			)
 		</PostBuildEvent>
-	</PropertyGroup>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">
