@@ -12,15 +12,29 @@ using XrmToolBox.Extensibility;
 
 namespace BUSecurityHierarchy
 {
+    /// <summary>
+    /// Helper class to store role information for search and display
+    /// </summary>
     public class RoleItem
     {
         public Guid RoleId { get; set; }
-        public string Name { get; set; }
+        public string RoleName { get; set; }
         public string BusinessUnit { get; set; }
+        public bool IsChecked { get; set; }
+
+        public RoleItem(Guid roleId, string roleName, string businessUnit = "", bool isChecked = false)
+        {
+            RoleId = roleId;
+            RoleName = roleName;
+            BusinessUnit = businessUnit;
+            IsChecked = isChecked;
+        }
 
         public override string ToString()
         {
-            return $"{Name} ({BusinessUnit})";
+            return string.IsNullOrWhiteSpace(BusinessUnit)
+                ? RoleName
+                : $"{RoleName} ({BusinessUnit})";
         }
     }
     public partial class MyPluginControl : PluginControlBase
@@ -288,6 +302,9 @@ namespace BUSecurityHierarchy
                     lblUsers.Text = $"👤 Users ({users.Entities.Count})";
                     lblTeams.Text = $"👥 Teams ({teams.Entities.Count})";
                     lblRoles.Text = $"🛡️ Security Roles ({roles.Entities.Count})";
+
+                    _selectedTeamId = null;
+                    HideRoleSaveButton();
                 }
             });
         }
@@ -299,6 +316,7 @@ namespace BUSecurityHierarchy
         //private Guid? _selectedTeamId = null; // Track currently selected team
         //private bool _hasUnsavedChanges = false;
         private HashSet<Guid> _originalAssignedRoles = new HashSet<Guid>();
+        //private int _currentLoadGeneration = 0;
         private void listViewTeams_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listViewTeams.SelectedItems.Count == 0)
@@ -313,9 +331,20 @@ namespace BUSecurityHierarchy
             _selectedTeamId = selectedTeamId;
             listViewUsers.Items.Clear();
 
+            // ✅ CLEAR SEARCH AND REMOVE FOCUS BEFORE LOADING
+            txtSearchRoles.TextChanged -= txtSearchRoles_TextChanged;
+            txtSearchRoles.Text = "";
+            txtSearchRoles.ForeColor = System.Drawing.Color.Gray;
+            txtSearchRoles.TextChanged += txtSearchRoles_TextChanged;
+
+            // ✅ MOVE FOCUS AWAY FROM SEARCH BOX
+            listViewTeams.Focus();
+
             LoadUsersForTeam(selectedTeamId);
             CheckRolesForTeam(selectedTeamId);
         }
+
+       
 
         private void chkListRoles_ItemCheck(object sender, ItemCheckEventArgs e)
         {
@@ -512,7 +541,11 @@ namespace BUSecurityHierarchy
 
                     // ✅ REFRESH ROLES TO SHOW UPDATED STATE
                     HideRoleSaveButton();
-                    CheckRolesForTeam(_selectedTeamId.Value);
+                    //CheckRolesForTeam(_selectedTeamId.Value);
+                    if (_selectedTeamId.HasValue && _selectedTeamId.Value == teamId)
+                    {
+                        CheckRolesForTeam(teamId); 
+                    }
                 }
             });
         }
@@ -623,33 +656,49 @@ namespace BUSecurityHierarchy
                     }
 
                     var assignedRoleIds = (HashSet<Guid>)args.Result;
-                    _originalAssignedRoles = new HashSet<Guid>(assignedRoleIds); // ✅ STORE ORIGINAL STATE
+                    _originalAssignedRoles = new HashSet<Guid>(assignedRoleIds);
 
-                    var allRoles = new List<RoleItem>();
-                    for (int i = 0; i < chkListRoles.Items.Count; i++)
+                    if (_allRoles != null && _allRoles.Count > 0)
                     {
-                        allRoles.Add((RoleItem)chkListRoles.Items[i]);
+                        foreach (var role in _allRoles)
+                        {
+                            role.IsChecked = assignedRoleIds.Contains(role.RoleId);
+                        }
                     }
 
                     // Sort: assigned roles first
-                    var sortedRoles = allRoles.OrderByDescending(r => assignedRoleIds.Contains(r.RoleId))
-                                              .ThenBy(r => r.Name).ToList();
+                    var sortedRoles = _allRoles
+                        .OrderByDescending(r => r.IsChecked)
+                        .ThenBy(r => r.RoleName)
+                        .ToList();
 
-                    chkListRoles.ItemCheck -= chkListRoles_ItemCheck; // ✅ PREVENT EVENT FIRING DURING RELOAD
+                    chkListRoles.ItemCheck -= chkListRoles_ItemCheck;
                     chkListRoles.Items.Clear();
+
                     foreach (var role in sortedRoles)
                     {
-                        bool isAssigned = assignedRoleIds.Contains(role.RoleId);
-                        chkListRoles.Items.Add(role, isAssigned);
+                        chkListRoles.Items.Add(role, role.IsChecked);
                     }
-                    chkListRoles.ItemCheck += chkListRoles_ItemCheck; // ✅ RE-ENABLE EVENT
+
+                    chkListRoles.ItemCheck += chkListRoles_ItemCheck;
 
                     lblRoles.Text = $"🛡️ Security Roles ({assignedRoleIds.Count} assigned)";
-                    HideRoleSaveButton(); // Reset save button state
+
+                    // ✅ CLEAR SEARCH PROPERLY - DISABLE EVENT FIRST
+                    txtSearchRoles.TextChanged -= txtSearchRoles_TextChanged;
+                    txtSearchRoles.Text = "";
+                    txtSearchRoles.ForeColor = System.Drawing.Color.Gray;
+                    txtSearchRoles.TextChanged += txtSearchRoles_TextChanged;
+
+                    // ✅ REMOVE FOCUS FROM SEARCH BOX
+                    chkListRoles.Focus();
+
+                    HideRoleSaveButton();
                 }
             });
         }
 
+       
         private void DisplayUsers(IEnumerable<Entity> users)
         {
             listViewUsers.Items.Clear();
@@ -669,17 +718,22 @@ namespace BUSecurityHierarchy
         private void DisplayRoles(IEnumerable<Entity> roles)
         {
             chkListRoles.Items.Clear();
+            _allRoles = new List<RoleItem>();
+
             if (roles == null) return;
             foreach (var role in roles)
             {
-                var roleItem = new RoleItem
-                {
-                    RoleId = role.Id,
-                    Name = role.GetAttributeValue<string>("name") ?? "N/A",
-                    BusinessUnit = role.GetAttributeValue<EntityReference>("businessunitid")?.Name ?? ""
-                };
+                var roleItem = new RoleItem(
+                    roleId: role.Id,
+                    roleName: role.GetAttributeValue<string>("name") ?? "N/A",
+                    businessUnit: role.GetAttributeValue<EntityReference>("businessunitid")?.Name ?? "",
+                     isChecked: false
+                );
+                _allRoles.Add(roleItem);
                 chkListRoles.Items.Add(roleItem, false);
             }
+            // Clear search box when loading new roles
+            txtSearchRoles.Text = "";
         }
 
         #endregion
@@ -712,6 +766,13 @@ namespace BUSecurityHierarchy
             var selectedTeam = listViewTeams.SelectedItems[0];
             string teamName = selectedTeam.SubItems[0].Text;
             string teamType = selectedTeam.SubItems.Count > 1 ? selectedTeam.SubItems[1].Text : "";
+
+            if (_hasUnsavedChanges)
+            {
+                MessageBox.Show("Please save or discard role changes before exporting.",
+                    "Unsaved Role Changes", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             // Get checked roles from UI
             var assignedRoles = new List<RoleItem>();
@@ -794,7 +855,7 @@ namespace BUSecurityHierarchy
                         int row1 = row + 3;
                         foreach (RoleItem roleItem in chkListRoles.CheckedItems)
                         {
-                            worksheet.Cell(row1, 1).Value = roleItem.Name; // Role Name
+                            worksheet.Cell(row1, 1).Value = roleItem.RoleName; // Role Name
                             worksheet.Cell(row1, 2).Value = roleItem.BusinessUnit; // BU Name
                             row1++;
                         }
@@ -1006,7 +1067,7 @@ namespace BUSecurityHierarchy
                             MessageBox.Show($"Successfully exported:\n" +
                                 $"• {teams.Count} teams\n" +
                                 $"• {users.Count} users\n" +
-                                $"• {roles.Count} users\n\n" +
+                                $"• {roles.Count} roles\n\n" +
                                 $"File: {filePath}",
                                 "Export Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
@@ -1075,6 +1136,7 @@ namespace BUSecurityHierarchy
         /// </summary>
         private void MyPluginControl_ConnectionUpdated(object sender, ConnectionUpdatedEventArgs e)
         {
+            //_currentLoadGeneration++;
             // Clear all UI when connection changes
             ClearAllUI();
 
@@ -1121,5 +1183,135 @@ namespace BUSecurityHierarchy
         }
 
         #endregion
+
+        #region Helper: Search Functionality
+
+        /// <summary>
+        /// Filters the roles CheckedListBox based on search text
+        /// </summary>
+        private void txtSearchRoles_TextChanged(object sender, EventArgs e)
+        {
+            FilterRoles(txtSearchRoles.Text);
+        }
+
+        /// <summary>
+        /// Filters the roles list based on search query
+        /// </summary>
+        private void FilterRoles(string searchQuery)
+        {
+            if (_allRoles == null || _allRoles.Count == 0)
+                return;
+
+            // ✅ IGNORE PLACEHOLDER TEXT
+            if (searchQuery == "Type to search roles...")
+                searchQuery = "";
+
+            // ✅ IGNORE IF CLEARING DURING PROGRAMMATIC UPDATE
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                // Only refresh if currently filtered
+                if (chkListRoles.Items.Count != _allRoles.Count)
+                {
+                    RefreshRolesList();
+                }
+                return;
+            }
+
+            // Save current checked states before clearing
+            SaveCurrentCheckedStates();
+
+            // Clear the checkedlistbox
+            chkListRoles.ItemCheck -= chkListRoles_ItemCheck;
+            chkListRoles.Items.Clear();
+
+            // Filter roles based on search query
+            var filteredRoles = _allRoles
+                .Where(r => r.RoleName.IndexOf(searchQuery, StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToList();
+
+            // Add filtered roles back to the checkedlistbox
+            foreach (var role in filteredRoles)
+            {
+                chkListRoles.Items.Add(role, role.IsChecked);
+            }
+
+            chkListRoles.ItemCheck += chkListRoles_ItemCheck;
+        }
+
+        /// <summary>
+        /// Refreshes the roles list without filtering (shows all roles)
+        /// </summary>
+        private void RefreshRolesList()
+        {
+            if (_allRoles == null || _allRoles.Count == 0)
+                return;
+
+            SaveCurrentCheckedStates();
+
+            chkListRoles.ItemCheck -= chkListRoles_ItemCheck;
+            chkListRoles.Items.Clear();
+
+            foreach (var role in _allRoles)
+            {
+                chkListRoles.Items.Add(role, role.IsChecked);
+            }
+
+            chkListRoles.ItemCheck += chkListRoles_ItemCheck;
+        }
+
+        /// <summary>
+        /// Saves the current checked states from the CheckedListBox to _allRoles
+        /// </summary>
+        private void SaveCurrentCheckedStates()
+        {
+            if (_allRoles == null)
+                return;
+
+            // Update the IsChecked property in _allRoles based on current CheckedListBox state
+            foreach (var item in chkListRoles.Items)
+            {
+                if (item is RoleItem roleItem)
+                {
+                    var matchingRole = _allRoles.FirstOrDefault(r => r.RoleId == roleItem.RoleId);
+                    if (matchingRole != null)
+                    {
+                        matchingRole.IsChecked = chkListRoles.CheckedItems.Contains(roleItem);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clear placeholder text when user focuses on search box
+        /// </summary>
+        private void txtSearchRoles_Enter(object sender, EventArgs e)
+        {
+            if (txtSearchRoles.Text == "Type to search roles...")
+            {
+                // ✅ DISABLE EVENT BEFORE CLEARING
+                txtSearchRoles.TextChanged -= txtSearchRoles_TextChanged;
+                txtSearchRoles.Text = "";
+                txtSearchRoles.ForeColor = System.Drawing.Color.Black;
+                txtSearchRoles.TextChanged += txtSearchRoles_TextChanged;
+            }
+        }
+
+        /// <summary>
+        /// Restore placeholder text when search box loses focus and is empty
+        /// </summary>
+        private void txtSearchRoles_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtSearchRoles.Text))
+            {
+                // ✅ DISABLE EVENT BEFORE SETTING PLACEHOLDER
+                txtSearchRoles.TextChanged -= txtSearchRoles_TextChanged;
+                txtSearchRoles.Text = "Type to search roles...";
+                txtSearchRoles.ForeColor = System.Drawing.Color.Gray;
+                txtSearchRoles.TextChanged += txtSearchRoles_TextChanged;
+            }
+        }
+
+        #endregion
+
     }
 }

@@ -159,8 +159,9 @@ namespace BUSecurityHierarchy
             this.listViewTeams.FullRowSelect = true;
             this.listViewTeams.GridLines = true;
             this.listViewTeams.Name = "listViewTeams";
-            this.listViewTeams.Columns.Add("Team Name", 200);
-            this.listViewTeams.Columns.Add("Type", 100);
+            this.listViewTeams.Columns.Add("Team Name", 230);
+            this.listViewTeams.Columns.Add("Type", 200);
+            this.listViewTeams.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewTeams.SelectedIndexChanged += new System.EventHandler(this.listViewTeams_SelectedIndexChanged);
 
             this.panelTeams.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -185,7 +186,7 @@ namespace BUSecurityHierarchy
             this.listViewUsers.FullRowSelect = true;
             this.listViewUsers.GridLines = true;
             this.listViewUsers.Name = "listViewUsers";
-            this.listViewUsers.Columns.Add("User Name", 200);
+            this.listViewUsers.Columns.Add("User Name", 230);
             this.listViewUsers.Columns.Add("Email", 200);
 
             this.panelUsers.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -205,6 +206,19 @@ namespace BUSecurityHierarchy
             this.lblRoles.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
             this.lblRoles.Margin = new System.Windows.Forms.Padding(0);
             this.lblRoles.Name = "lblRoles";
+
+            // SEARCH TEXTBOX
+            this.txtSearchRoles = new System.Windows.Forms.TextBox();
+            this.txtSearchRoles.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtSearchRoles.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtSearchRoles.Name = "txtSearchRoles";
+            this.txtSearchRoles.Height = 25;
+            this.txtSearchRoles.ForeColor = System.Drawing.Color.Gray;
+            this.txtSearchRoles.Text = "Type to search roles...";
+            this.txtSearchRoles.TextChanged += new System.EventHandler(this.txtSearchRoles_TextChanged);
+            this.txtSearchRoles.Enter += new System.EventHandler(this.txtSearchRoles_Enter);
+            this.txtSearchRoles.Leave += new System.EventHandler(this.txtSearchRoles_Leave);
+
             //Warning Message 
             this.lblRoleChangesWarning = new System.Windows.Forms.Label();
             this.lblRoleChangesWarning.Text = "⚠️ You have unsaved changes. Click Save to apply or cancel to discard.";
@@ -244,6 +258,7 @@ namespace BUSecurityHierarchy
             this.panelRoles.Name = "panelRoles";
             this.panelRoles.Controls.Add(this.chkListRoles);
             this.panelRoles.Controls.Add(this.lblRoleChangesWarning);
+            this.panelRoles.Controls.Add(this.txtSearchRoles);
             this.panelRoles.Controls.Add(this.btnSaveRoles);
             this.panelRoles.Controls.Add(this.lblRoles);
 
@@ -283,6 +298,7 @@ namespace BUSecurityHierarchy
         private System.Windows.Forms.Label lblRoleChangesWarning;
         private Guid? _selectedTeamId; // Track selected team
         private bool _hasUnsavedChanges; // Track unsaved changes
+        
 
         // Left Panel
         private System.Windows.Forms.Panel panelBU;
@@ -302,5 +318,8 @@ namespace BUSecurityHierarchy
         private System.Windows.Forms.Panel panelRoles;
         private System.Windows.Forms.Label lblRoles;
         private System.Windows.Forms.CheckedListBox chkListRoles;
+        //Search Roles
+        private System.Windows.Forms.TextBox txtSearchRoles;
+        private System.Collections.Generic.List<RoleItem> _allRoles; // Store all roles for search functionality
     }
 }
