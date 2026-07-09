@@ -27,9 +27,9 @@
 
   ┌───────────────────────────────────────────────────────────────────────────┐
   │  BU Security Hierarchy Viewer                                             │
-  │  [🔄 Load BU Hierarchy] [➕ Expand All] [➖ Collapse All] [📥 Export]    │
-  ├────────────────────────────────────────────────────────────────────────────┤
-  │ 💡 Quick Guide: Export without team = all data | Select team = filtered   │
+  │  [🔄 Load BU Hierarchy] [➕ Expand All] [➖ Collapse All] [📥 Export]   │
+  ├───────────────────────────────────────────────────────────────────────────┤
+  │ 💡 Quick Guide: Export without team = all data | Select team = filtered  │
   │    export | Role changes = Save button appears                      [Hide]│
   ├──────────────┬──────────────────┬─────────────────────────────────────────┤
   │ 📂 Business  │ 👥 Teams         │ 👤 Users                  │ 🛡️ Roles    │
@@ -201,10 +201,8 @@
   |--------|---------|
   | ✅ **Local Execution** | Plugin runs entirely on your local machine |
   | ✅ **No External Calls** | No data is sent to any external server |
-  | ✅ **Org Scoped** | Only reads/writes data in YOUR connected Dynamics 365 org |
   | ✅ **Open Source** | Source code is fully open and auditable |
   | ✅ **Local Export** | Excel files saved only to locations you choose |
-  | ✅ **Role Assignment Logging** | All role changes are logged in Dynamics 365 audit trail |
   | ❌ **No Telemetry** | No tracking, analytics, or usage data collected |
   | ❌ **No Cloud Storage** | Exported data stays on your local machine |
 
